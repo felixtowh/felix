@@ -295,7 +295,7 @@ workflow:
           max_write_timeout: 0
         title: HTTP 请求
         type: http-request
-        url: https://difyportal.towh.cn/api/external/memories?format=text
+        url: https://your-portal-domain.com/api/external/memories?format=text
         variables: []
       height: 152
       id: '1777893229243'
@@ -440,7 +440,7 @@ workflow:
           max_write_timeout: 0
         title: 新增习惯
         type: http-request
-        url: https://difyportal.towh.cn/api/external/memory
+        url: https://your-portal-domain.com/api/external/memory
         variables: []
       height: 136
       id: '1777896207210'

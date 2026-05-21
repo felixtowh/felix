@@ -36,7 +36,7 @@ def translate_dify_error(body: dict) -> str:
 class DifyClient:
     """Dify API 客户端"""
     
-    def __init__(self, api_key: str, base_url: str = "https://dify.towh.cn", verify_ssl: bool = True):
+    def __init__(self, api_key: str, base_url: str = "https://your-dify-server.com", verify_ssl: bool = True):
         self.api_key = api_key
         # 处理 base_url 可能已包含 /v1 后缀的情况，避免双重 /v1
         base = base_url.rstrip('/')

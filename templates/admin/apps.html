@@ -955,7 +955,7 @@
                         {% endif %}
                         <div class="app-details">
                             <h3>{{ app.name }}</h3>
-                            <p>{{ app.welcome_message or '暂无描述' }} · {{ app.base_url or 'http://dify.towh.cn' }} · 创建于 {{ app.created_at }}</p>
+                            <p>{{ app.welcome_message or '暂无描述' }} · {{ app.base_url or 'http://your-dify-server.com' }} · 创建于 {{ app.created_at }}</p>
                         </div>
                     </div>
                     <div class="app-meta">
@@ -1061,7 +1061,7 @@
                                 </button>
                             </td>
                             <td><span class="text-mono">{{ app.api_key[:8] }}...{{ app.api_key[-4:] if app.api_key|length > 12 else '' }}</span></td>
-                            <td><span class="text-truncate">{{ app.base_url or 'http://dify.towh.cn' }}</span></td>
+                            <td><span class="text-truncate">{{ app.base_url or 'http://your-dify-server.com' }}</span></td>
                             <td>
                                 <div class="actions-cell">
                                     <a href="/admin/apps/{{ app.id }}/detail" class="btn-sm-table">详情</a>

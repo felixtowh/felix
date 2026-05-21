@@ -797,7 +797,7 @@ async def chat_api(request: Request, app_id: int):
         logger.info("Creating new conversation (no conversation_id provided)")
     
     # 调用 Dify API
-    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
     
     try:
         response = await client.chat_message(
@@ -886,7 +886,7 @@ async def chat_stream(request: Request, app_id: int):
         conversation_id = None
     
     # 调用 Dify API（流式）
-    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
     
     async def generate():
         logger.info(f"Starting stream for app_id={app_id}, user={dify_user}")
@@ -1359,7 +1359,7 @@ async def admin_create_app(
     request: Request,
     name: str = Form(...),
     api_key: str = Form(...),
-    base_url: str = Form("http://dify.towh.cn"),
+    base_url: str = Form("http://your-dify-server.com"),
     welcome_message: str = Form(None),
     logo_url: str = Form(None),
     user_field: str = Form("name"),
@@ -1491,7 +1491,7 @@ async def admin_get_app_status(request: Request, app_id: int):
     try:
         client = DifyClient(
             api_key=app["api_key"],
-            base_url=app["base_url"] or "http://dify.towh.cn",
+            base_url=app["base_url"] or "http://your-dify-server.com",
             verify_ssl=not app.get("skip_ssl_verify", False)
         )
         
@@ -1559,7 +1559,7 @@ async def admin_test_app_connection(request: Request, app_id: int):
     try:
         client = DifyClient(
             api_key=app["api_key"],
-            base_url=app["base_url"] or "http://dify.towh.cn",
+            base_url=app["base_url"] or "http://your-dify-server.com",
             verify_ssl=not app.get("skip_ssl_verify", False)
         )
         
@@ -1929,7 +1929,7 @@ async def get_app_info_api(request: Request, app_id: int):
             "welcome_message": app["welcome_message"],
             "logo_url": app["logo_url"],
             "user_field": app["user_field"],
-            "base_url": app["base_url"] if app["base_url"] else "http://dify.towh.cn",
+            "base_url": app["base_url"] if app["base_url"] else "http://your-dify-server.com",
             "enable_memory": bool(app.get("enable_memory", 0)),
             "enable_thinking": bool(app.get("enable_thinking", 0))
         }
@@ -1977,7 +1977,7 @@ async def get_conversations_api(request: Request, app_id: int):
         # 同步 Dify 会话标题
         try:
             dify_user = build_dify_user(user, app)
-            client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+            client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
             dify_result = await client.get_conversations(dify_user, limit=100)
             dify_names = {c["id"]: c["name"] for c in dify_result.get("data", []) if c.get("name")}
             for conv in conversations:
@@ -2025,7 +2025,7 @@ async def rename_conversation_api(request: Request, app_id: int, conversation_id
         
         # 同步到 Dify
         dify_user = build_dify_user(user, app)
-        client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+        client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
         await client.rename_conversation(conversation_id, dify_user, name=name)
         
         return {"success": True, "name": name}
@@ -2055,7 +2055,7 @@ async def get_messages_api(request: Request, app_id: int, conversation_id: str):
     try:
         dify_user = build_dify_user(user, app)
         
-        client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+        client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
         
         logger.info(f"Fetching messages - app_id: {app_id}, conversation_id: {conversation_id}, user: {dify_user}")
         
@@ -2266,7 +2266,7 @@ async def upload_file_api(request: Request, app_id: int, file: UploadFile = File
     
     # 从数据库获取应用 API Key
     api_key = app["api_key"]
-    base_url = app["base_url"] if app["base_url"] else "http://dify.towh.cn"
+    base_url = app["base_url"] if app["base_url"] else "http://your-dify-server.com"
     skip_ssl_verify = app["skip_ssl_verify"] if app["skip_ssl_verify"] else False
     
     # 调用 Dify API 上传文件
@@ -2314,7 +2314,7 @@ async def message_feedback_api(request: Request, app_id: int):
     dify_user = build_dify_user(user, app)
     
     # 调用 Dify API
-    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
     
     try:
         # 调用 Dify API
@@ -2376,7 +2376,7 @@ async def text_to_speech_api(request: Request, app_id: int):
     
     dify_user = build_dify_user(user, app)
     
-    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
     
     try:
         audio_data = await client.text_to_speech(
@@ -2417,7 +2417,7 @@ async def speech_to_text_api(request: Request, app_id: int, file: UploadFile = F
     
     dify_user = build_dify_user(user, app)
     
-    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://dify.towh.cn", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
+    client = create_dify_client(api_key=app["api_key"], base_url=app["base_url"] if app["base_url"] else "http://your-dify-server.com", skip_ssl_verify=app["skip_ssl_verify"] if app["skip_ssl_verify"] else False)
     
     try:
         result = await client.speech_to_text(

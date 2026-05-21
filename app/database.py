@@ -41,7 +41,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 api_key TEXT NOT NULL,
-                base_url TEXT DEFAULT 'http://dify.towh.cn',
+                base_url TEXT DEFAULT 'http://your-dify-server.com',
                 description TEXT,
                 is_active BOOLEAN DEFAULT 1,
                 welcome_message TEXT DEFAULT '你好！有什么可以帮助你的吗？',
@@ -428,7 +428,7 @@ def create_app(name: str, api_key: str, base_url: str = None,
         cursor = db.execute(
             """INSERT INTO apps (name, api_key, base_url, welcome_message, is_active, logo_url, user_field, skip_ssl_verify, opening_statement, is_home_app, enable_memory, enable_thinking, enable_instant_reply, created_at, updated_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (name, api_key, base_url or 'http://dify.towh.cn', welcome_message, is_active, logo_url, user_field, skip_ssl_verify, opening_statement, is_home_app, enable_memory, enable_thinking, enable_instant_reply, now_beijing(), now_beijing())
+            (name, api_key, base_url or 'http://your-dify-server.com', welcome_message, is_active, logo_url, user_field, skip_ssl_verify, opening_statement, is_home_app, enable_memory, enable_thinking, enable_instant_reply, now_beijing(), now_beijing())
         )
         db.commit()
         if is_home_app:

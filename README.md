@@ -248,9 +248,15 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8088
 
 ## License
 
-All Rights Reserved
+Apache License 2.0
 
 Copyright (c) 2026 felixtowh
 
-未经版权持有人事先书面许可，任何人不得以任何形式或方式使用、复制、修改、合并、
-发布、分发、再许可或销售本软件的任何部分。
+Licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) for details.
+
+本软件采用 Apache 2.0 许可证，你可以：
+- ✅ 自由使用、修改、分发
+- ✅ 商业使用
+- ✅ 闭源修改（只需声明变更）
+
+但必须保留版权声明和许可证文本。

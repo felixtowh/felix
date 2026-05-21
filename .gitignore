@@ -78,3 +78,11 @@ setup-https*.sh
 # 品牌相关
 static/images/debo-logo.png
 static/WW_verify_*.txt
+
+# 任务记录和备份文件
+TASK.md
+*.bak
+*.backup
+
+# 示例文件中的个人信息
+static/examples/*.yml

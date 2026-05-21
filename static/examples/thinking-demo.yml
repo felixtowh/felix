@@ -388,7 +388,7 @@ workflow:
       type: custom
       width: 241
     - data:
-        author: 王辉-mac
+        author: admin
         desc: ''
         height: 88
         selected: false

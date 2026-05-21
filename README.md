@@ -240,12 +240,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8088
 
 ## 截图
 
-![登录页](docs/screenshots/login.png)
-![应用列表](docs/screenshots/apps.png)
-![对话页面](docs/screenshots/chat.png)
-![管理后台](docs/screenshots/admin.png)
-
-> 截图待补充，欢迎提交 PR。
+截图待补充，欢迎提交 PR。
 
 ## 贡献
 
@@ -253,4 +248,9 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8088
 
 ## License
 
-MIT License
+All Rights Reserved
+
+Copyright (c) 2026 felixtowh
+
+未经版权持有人事先书面许可，任何人不得以任何形式或方式使用、复制、修改、合并、
+发布、分发、再许可或销售本软件的任何部分。

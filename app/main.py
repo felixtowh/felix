@@ -462,8 +462,8 @@ async def login(request: Request, userid: str = Form(...), password: str = Form(
         if not verify_password(password, stored_password):
             return RedirectResponse(f"/login?error={urllib.parse.quote('密码错误')}", status_code=302)
     else:
-        # 兼容旧用户，默认密码规则：userid + "123"
-        expected_password = userid + "123"
+        # 兼容旧用户，默认密码规则：userid + "001"
+        expected_password = userid + "001"
         if password != expected_password:
             return RedirectResponse(f"/login?error={urllib.parse.quote('密码错误')}", status_code=302)
 
@@ -502,7 +502,7 @@ async def change_password(request: Request):
         if not verify_password(current_password, stored_password):
             raise HTTPException(status_code=400, detail="当前密码错误")
     else:
-        expected_password = user["userid"] + "123"
+        expected_password = user["userid"] + "001"
         if current_password != expected_password:
             raise HTTPException(status_code=400, detail="当前密码错误")
 

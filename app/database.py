@@ -485,8 +485,8 @@ def get_or_create_user(userid: str, name: str, password: str = None):
             db.commit()
             return dict(user), False
 
-        # 创建新用户，默认密码：123456
-        default_password = password or "123456"
+        # 创建新用户，默认密码：admin001
+        default_password = password or "admin001"
         cursor = db.execute(
             """INSERT INTO users (userid, name, password, created_at)
                VALUES (?, ?, ?, ?)""",
@@ -605,7 +605,7 @@ def batch_create_users(users_data: list):
         for user_data in users_data:
             userid = user_data.get('userid', '').strip()
             name = user_data.get('name', '').strip()
-            password = user_data.get('password', '').strip() or (userid + '123')
+            password = user_data.get('password', '').strip() or (userid + '001')
 
             if not userid or not name:
                 skipped_count += 1

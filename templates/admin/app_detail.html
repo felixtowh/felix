@@ -1,0 +1,573 @@
+{% extends "admin/base.html" %}
+{% set active_nav = 'apps' %}
+{% block title %}{{ app.name }} - 应用详情{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block extra_css %}
+        .container a,
+        .container button {
+            text-decoration: none !important;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            position: sticky;
+            top: 64px;
+            z-index: 50;
+            background: var(--background);
+            padding: 12px 0;
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none !important;
+            transition: all 0.2s;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            background: rgba(99, 102, 241, 0.08);
+            font-weight: 600;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .breadcrumb a:hover {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .breadcrumb a::before {
+            content: '←';
+            font-size: 12px;
+        }
+
+        .breadcrumb span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .app-info-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .app-info-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .app-info-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius);
+        }
+
+        .app-info-content { flex: 1; }
+
+        .app-info-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .app-info-meta {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        @media (max-width: 768px) {
+            .app-info-card { flex-direction: column; align-items: flex-start; gap: 16px; padding: 20px; }
+            .app-info-icon { width: 56px; height: 56px; font-size: 24px; }
+            .app-info-name { font-size: 18px; }
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        /* Connection Status Section */
+        .connection-status-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .connection-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .connection-status-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .connection-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .connection-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--surface-hover);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .connection-status-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .connection-status-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .connection-status-value.online { color: var(--success); }
+        .connection-status-value.offline { color: var(--danger); }
+
+        .error-log {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .error-log:empty::before {
+            content: '暂无错误日志';
+            color: var(--text-muted);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.blue { background: rgba(99, 102, 241, 0.1); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.1); }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.1); }
+
+        .stat-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-name { font-weight: 500; }
+        .user-id { font-size: 12px; color: var(--text-muted); }
+
+        @media (max-width: 768px) {
+            .stat-card { padding: 20px; gap: 16px; }
+            .stat-icon { width: 48px; height: 48px; font-size: 22px; }
+            .stat-value { font-size: 28px; }
+            .chart-container { height: 240px; }
+            .breadcrumb { font-size: 13px; gap: 6px; top: 56px; }
+            .connection-status-grid { grid-template-columns: 1fr; }
+        }
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/admin/apps">应用管理</a>
+            <span>/</span>
+            <span>{{ app.name }}</span>
+        </div>
+
+        <div class="page-header" style="margin-bottom: 32px;">
+            <div class="page-title-group">
+                <h2 style="font-size: 28px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">应用详情</h2>
+                <p style="font-size: 14px; color: var(--text-secondary);">查看应用使用情况和用户活跃度明细</p>
+            </div>
+        </div>
+
+        <div class="app-info-card">
+            {% if app.logo_url %}
+            <div class="app-info-icon" style="background: transparent;">
+                <img src="{{ app.logo_url }}" alt="{{ app.name }}">
+            </div>
+            {% else %}
+            <div class="app-info-icon">🤖</div>
+            {% endif %}
+            <div class="app-info-content">
+                <div class="app-info-name">{{ app.name }}</div>
+                <div class="app-info-meta">
+                    <span>{{ app.base_url or 'http://dify.towh.cn' }}</span>
+                    {% if app.is_active %}
+                    <span class="status-badge status-active">● 运行中</span>
+                    {% else %}
+                    <span class="status-badge status-inactive">● 已停用</span>
+                    {% endif %}
+                    {% if app.is_home_app %}
+                    <span class="status-badge" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">🏠 首页应用</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 连接状态监控 -->
+        <div class="connection-status-section">
+            <div class="connection-status-header">
+                <h3>📡 连接状态监控</h3>
+                <button class="btn btn-sm btn-secondary" onclick="refreshConnectionStatus()">🔄 刷新</button>
+            </div>
+            <div class="connection-status-grid">
+                <div class="connection-status-item">
+                    <span class="connection-status-label">连接状态</span>
+                    <span class="connection-status-value" id="connStatus">检测中...</span>
+                </div>
+                <div class="connection-status-item">
+                    <span class="connection-status-label">最后使用</span>
+                    <span class="connection-status-value" id="connLastUsed">-</span>
+                </div>
+                <div class="connection-status-item">
+                    <span class="connection-status-label">响应时间</span>
+                    <span class="connection-status-value" id="connResponseTime">-</span>
+                </div>
+                <div class="connection-status-item">
+                    <span class="connection-status-label">API 版本</span>
+                    <span class="connection-status-value" id="connApiVersion">-</span>
+                </div>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px;">错误日志</div>
+            <div class="error-log" id="connErrorLog"></div>
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon blue">👥</div>
+                    <div class="stat-label">使用用户</div>
+                </div>
+                <div class="stat-value">{{ stats.total.user_count or 0 }}</div>
+                <div class="stat-desc">累计使用人数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon green">💬</div>
+                    <div class="stat-label">总对话数</div>
+                </div>
+                <div class="stat-value">{{ stats.total.total_conversations or 0 }}</div>
+                <div class="stat-desc">累计对话数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon orange">🕐</div>
+                    <div class="stat-label">最后使用</div>
+                </div>
+                <div class="stat-value" style="font-size: 20px; padding-top: 8px;">
+                    {{ stats.total.last_used or '从未使用' }}
+                </div>
+                <div class="stat-desc">最近活跃时间</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">📈 近30日活跃度</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">👤 用户使用明细</h3>
+            </div>
+            {% if stats.users %}
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th>用户</th><th>对话数</th><th>最后活跃</th></tr>
+                </thead>
+                <tbody>
+                    {% for u in stats.users %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar">{{ u.name[-1] if u.name else '?' }}</div>
+                                <div>
+                                    <div class="user-name">{{ u.name }}</div>
+                                    <div class="user-id">{{ u.userid }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ u.conversation_count or 0 }}</td>
+                        <td>{{ u.last_used or '从未使用' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <div class="empty-title">暂无数据</div>
+                <p>用户活跃数据将在用户开始对话后显示</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+        async function refreshConnectionStatus() {
+            const statusEl = document.getElementById('connStatus');
+            const lastUsedEl = document.getElementById('connLastUsed');
+            const responseTimeEl = document.getElementById('connResponseTime');
+            const apiVersionEl = document.getElementById('connApiVersion');
+            const errorLogEl = document.getElementById('connErrorLog');
+
+            statusEl.textContent = '检测中...';
+            statusEl.className = 'connection-status-value';
+
+            try {
+                const response = await fetch(`/admin/api/apps/{{ app.id }}/status`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || '未知错误');
+                }
+
+                statusEl.textContent = data.connected ? '在线 🟢' : '离线 🔴';
+                statusEl.className = 'connection-status-value ' + (data.connected ? 'online' : 'offline');
+                lastUsedEl.textContent = data.last_used || '从未使用';
+                responseTimeEl.textContent = data.response_time ? data.response_time + 'ms' : '-';
+                apiVersionEl.textContent = data.api_version || '-';
+
+                if (data.errors && data.errors.length > 0) {
+                    errorLogEl.innerHTML = data.errors.map(e => `<div style="margin-bottom: 8px; color: var(--danger);">${escapeHtml(e)}</div>`).join('');
+                } else {
+                    errorLogEl.innerHTML = '<div style="color: var(--text-muted);">暂无错误日志</div>';
+                }
+            } catch (error) {
+                console.error('刷新状态失败:', error);
+                statusEl.textContent = '检测失败';
+                statusEl.className = 'connection-status-value offline';
+                errorLogEl.innerHTML = `<div style="color: var(--danger);">错误: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时自动刷新状态
+        window.addEventListener('load', refreshConnectionStatus);
+
+        (function renderDailyChart() {
+            const dailyData = {{ stats.daily | tojson }};
+            if (!dailyData || dailyData.length === 0) return;
+
+            const labels = dailyData.map(d => d.date);
+            const activeUsers = dailyData.map(d => d.active_users);
+            const messageCounts = dailyData.map(d => d.message_count);
+
+            const ctx = document.getElementById('dailyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '活跃用户数',
+                            data: activeUsers,
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '对话次数',
+                            data: messageCounts,
+                            type: 'line',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                            padding: 12,
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxRotation: 45, minRotation: 45, font: { size: 11 }, maxTicksLimit: window.innerWidth <= 768 ? 6 : 30 }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: '活跃用户数', color: 'rgba(99, 102, 241, 1)' },
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { color: 'rgba(99, 102, 241, 1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: '对话次数', color: 'rgba(245, 158, 11, 1)' },
+                            grid: { display: false },
+                            ticks: { color: 'rgba(245, 158, 11, 1)' }
+                        }
+                    }
+                }
+            });
+        })();
+{% endblock %}

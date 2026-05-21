@@ -1,0 +1,249 @@
+/**
+ * Dify Portal - App List Page Styles
+ * 应用列表页面样式
+ */
+
+/* ==================== 欢迎区域 ==================== */
+.welcome {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+}
+
+.welcome h2 {
+    font-size: 24px;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.welcome p {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* ==================== 应用网格 ==================== */
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* ==================== 应用卡片 ==================== */
+.app-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.app-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.app-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-primary);
+    font-size: 24px;
+    margin-bottom: var(--spacing-lg);
+}
+
+.app-icon img {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+}
+
+.app-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.app-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: var(--spacing-lg);
+}
+
+.app-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ==================== 用户菜单 ==================== */
+.user-menu {
+    position: relative;
+    display: inline-block;
+    padding: var(--spacing-sm) 0;
+}
+
+.user-menu-trigger {
+    cursor: pointer;
+}
+
+.user-menu-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 0;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 160px;
+    z-index: 100;
+    padding: var(--spacing-xs) 0;
+}
+
+.user-menu:hover .user-menu-dropdown,
+.user-menu-dropdown:hover {
+    display: block;
+}
+
+/* 添加透明连接区域，防止鼠标移动时菜单消失 */
+.user-menu::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: transparent;
+}
+
+.user-menu-item {
+    display: block;
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 14px;
+    transition: background var(--transition-fast);
+}
+
+.user-menu-item:hover {
+    background: var(--bg-secondary);
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: var(--border-lighter);
+    margin: var(--spacing-xs) 0;
+}
+
+/* ==================== 管理员链接 ==================== */
+.admin-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+    .apps-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .welcome h2 {
+        font-size: 20px;
+    }
+}
+
+/* ==================== 首次登录提示 ==================== */
+.first-login-notice {
+    background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%);
+    border: 1px solid #91d5ff;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+    animation: slideDown 0.4s ease;
+}
+
+.first-login-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #096dd9;
+    margin-bottom: var(--spacing-md);
+}
+
+.first-login-body p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: var(--spacing-md);
+    line-height: 1.6;
+}
+
+.first-login-info {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-md) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 15px;
+}
+
+.info-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    min-width: 64px;
+}
+
+.first-login-info code {
+    background: #f6ffed;
+    border: 1px solid #b7eb8f;
+    color: #389e0d;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.first-login-hint {
+    color: #fa8c16 !important;
+    font-size: 13px !important;
+    margin-top: var(--spacing-sm);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

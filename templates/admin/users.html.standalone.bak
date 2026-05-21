@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="turbo-cache-control" content="no-cache">
+    <title>用户管理 - Dify Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <!-- SheetJS for Excel reading -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #0f172a;
+                --surface: #1e293b;
+                --surface-hover: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --text-muted: #64748b;
+                --border: #334155;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            color: var(--primary);
+            background: var(--surface-hover);
+        }
+
+        .nav a.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            background: var(--surface-hover);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--surface-hover);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .user-info:hover {
+            background: var(--border);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .user-dropdown-item:first-child {
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 var(--radius) var(--radius);
+            color: var(--danger);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title-group h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .page-title-group p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        /* User List */
+        .user-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .user-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .user-info-detail h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .user-info-detail p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--surface-hover);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 24px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xl);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--surface-hover);
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(90vh - 140px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            background: var(--surface);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Import Template */
+        .import-template {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #166534;
+        }
+
+        .import-template code {
+            background: var(--surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 20px;
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .file-input-label:hover {
+            background: var(--border);
+        }
+
+        /* Preview Table */
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .preview-table th {
+            background: var(--surface-hover);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            z-index: 9999;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-xl);
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header { padding: 0 16px; }
+            .header-content { height: 56px; }
+            .header-left { gap: 12px; }
+            .logo h1 { font-size: 16px; }
+            .logo-icon { width: 36px; height: 36px; }
+            .nav { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; scrollbar-width: none; }
+            .nav::-webkit-scrollbar { display: none; }
+            .nav a { font-size: 12px; padding: 6px 12px; white-space: nowrap; }
+            .back-link span { display: none; }
+            .back-link { padding: 8px; }
+            .user-info span { display: none; }
+            .user-info { padding: 6px; }
+            .user-avatar { width: 32px; height: 32px; font-size: 14px; }
+            .container { padding: 16px; }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .page-title-group h2 { font-size: 20px; }
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 16px;
+            }
+            .user-actions {
+                width: 100%;
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 8px 6px;
+            }
+            .user-actions .btn-sm { min-height: 44px; }
+            .modal-content { width: 100% !important; max-width: calc(100vw - 20px) !important; margin: 10px !important; }
+            .btn { padding: 10px 16px; font-size: 13px; min-height: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon"><img src="/static/images/debo-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='⚙️';this.parentElement.style.background='linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)'"></div>
+                    <h1>管理后台</h1>
+                </div>
+                <nav class="nav">
+                    <a href="/admin">概览</a>
+                    <a href="/admin/apps">应用管理</a>
+                    <a href="/admin/users" class="active">用户管理</a>
+                    <a href="/admin/stats">使用统计</a>
+                    <a href="/admin/settings">功能扩展</a>
+                    <a href="/admin/wecom-bot">Bot 管理</a>
+                </nav>
+            </div>
+            <div class="user-section">
+                <a href="/" class="back-link" target="portal_tab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    返回前台
+                </a>
+                <div class="user-info" onclick="toggleUserDropdown()">
+                    <div class="user-avatar">{{ user.name[-1] }}</div>
+                    <span>{{ user.name }}</span>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-dropdown-item" onclick="window.open('/', 'portal_tab')">返回前台</div>
+                        <div class="user-dropdown-item" onclick="logout()">退出登录</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title-group">
+                <h2>用户管理</h2>
+                <p>管理系统用户，分配管理员权限</p>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="openAddUserModal()">+ 添加用户</button>
+                <button class="btn btn-success" onclick="openBatchImportModal()">📥 批量导入</button>
+            </div>
+        </div>
+
+        <div class="user-list">
+            {% if users %}
+                {% for u in users %}
+                <div class="user-item">
+                    <div class="user-info-detail">
+                        <h3>{{ u.name }} <span style="font-weight: normal; color: var(--text-muted);">({{ u.userid }})</span></h3>
+                        <p>创建于 {{ u.created_at }}</p>
+                    </div>
+                    <div class="user-meta">
+                        {% if u.is_admin %}
+                        <span class="admin-badge">管理员</span>
+                        {% endif %}
+                        <div class="user-actions">
+                            <button class="btn btn-sm btn-secondary" onclick="openEditModal({{ u.id }}, '{{ u.name }}', '{{ u.userid }}')">编辑</button>
+                            <button class="btn btn-sm btn-secondary" onclick="openResetPasswordModal({{ u.id }}, '{{ u.name }}', '{{ u.userid }}')">重置密码</button>
+                            {% if not u.is_admin %}
+                            <button class="btn btn-sm" onclick="setAdmin({{ u.id }}, true)">设为管理员</button>
+                            {% else %}
+                            <button class="btn btn-sm btn-secondary" onclick="setAdmin({{ u.id }}, false)">取消管理员</button>
+                            {% endif %}
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser({{ u.id }})">删除</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <div class="empty-title">暂无用户</div>
+                    <p>点击"添加用户"或"批量导入"创建用户</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑用户</h3>
+                <button class="modal-close" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>昵称</label>
+                    <input type="text" id="editName" placeholder="请输入昵称">
+                </div>
+                <div class="form-group">
+                    <label>账号</label>
+                    <input type="text" id="editUserid" placeholder="请输入账号">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加用户</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>账号 *</label>
+                    <input type="text" id="addUserid" placeholder="请输入账号（英文/数字）" required>
+                </div>
+                <div class="form-group">
+                    <label>昵称 *</label>
+                    <input type="text" id="addName" placeholder="请输入昵称" required>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="text" id="addPassword" placeholder="请输入密码（默认：账号+123）">
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addUserModal')">取消</button>
+                <button class="btn btn-primary" onclick="addUser()">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>重置密码</h3>
+                <button class="modal-close" onclick="closeModal('resetPasswordModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">正在为 <strong id="resetUserName"></strong> 重置密码</p>
+                <div class="form-group">
+                    <label>新密码</label>
+                    <input type="text" id="newPassword" placeholder="请输入新密码">
+                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">默认密码规则：账号 + "123"</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('resetPasswordModal')">取消</button>
+                <button class="btn btn-primary" onclick="resetPassword()">确认重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch Import Modal -->
+    <div id="batchImportModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>批量导入用户</h3>
+                <button class="modal-close" onclick="closeModal('batchImportModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="import-template">
+                    <strong>📋 Excel 模板格式：</strong><br>
+                    第一行为表头，包含以下列：<code>userid</code> (账号), <code>name</code> (昵称), <code>password</code> (密码)<br>
+                    从第二行开始填写用户数据，账号和昵称为必填项。密码为空时默认为 账号+"123"。
+                    <div style="margin-top: 12px;">
+                        <button class="btn btn-sm btn-secondary" onclick="downloadTemplate()">📥 下载 Excel 模板</button>
+                    </div>
+                </div>
+
+                <div class="file-input-wrapper">
+                    <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(event)">
+                    <label for="excelFile" class="file-input-label">选择 Excel 文件</label>
+                </div>
+                <span id="fileName" style="margin-left: 12px; color: var(--text-secondary); font-size: 14px;"></span>
+
+                <div id="previewSection" style="display: none; margin-top: 20px;">
+                    <h4 style="font-size: 14px; color: var(--text-primary); margin-bottom: 12px;">数据预览（前10条）</h4>
+                    <div style="max-height: 300px; overflow-y: auto; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>账号</th>
+                                    <th>昵称</th>
+                                    <th>密码</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="previewTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="previewCount" style="margin-top: 12px; font-size: 13px; color: var(--text-secondary);"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('batchImportModal')">取消</button>
+                <button class="btn btn-success" id="importBtn" onclick="importUsers()" disabled>确认导入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // User dropdown functions
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userInfo = document.querySelector('.user-info');
+            const dropdown = document.getElementById('userDropdown');
+            if (userInfo && dropdown && !userInfo.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/logout');
+                if (response.ok || response.redirected) {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('退出登录失败:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        let currentEditUserId = null;
+        let currentResetUserId = null;
+        let importData = [];
+
+        function showToast(message, duration = 2000) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Edit User
+        function openEditModal(userId, name, userid) {
+            currentEditUserId = userId;
+            document.getElementById('editName').value = name;
+            document.getElementById('editUserid').value = userid;
+            openModal('editModal');
+        }
+
+        async function saveUser() {
+            const name = document.getElementById('editName').value.trim();
+            const userid = document.getElementById('editUserid').value.trim();
+
+            if (!name || !userid) {
+                showToast('昵称和账号不能为空');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/api/users/${currentEditUserId}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ name, userid })
+                });
+
+                if (response.ok) {
+                    showToast('✅ 用户已更新');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    const data = await response.json();
+                    showToast('❌ 保存失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (error) {
+                showToast('❌ 保存失败: ' + error.message);
+            }
+        }
+
+        // Add User
+        function openAddUserModal() {
+            document.getElementById('addUserid').value = '';
+            document.getElementById('addName').value = '';
+            document.getElementById('addPassword').value = '';
+            openModal('addUserModal');
+        }
+
+        async function addUser() {
+            const userid = document.getElementById('addUserid').value.trim();
+            const name = document.getElementById('addName').value.trim();
+            const password = document.getElementById('addPassword').value.trim();
+
+            if (!userid || !name) {
+                showToast('账号和昵称不能为空');
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_-]+$/.test(userid)) {
+                showToast('账号只能包含英文、数字、下划线和横线');
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/api/users/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userid, name, password })
+                });
+
+                if (response.ok) {
+                    showToast('✅ 用户已添加');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    const data = await response.json();
+                    showToast('❌ 添加失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (error) {
+                showToast('❌ 添加失败: ' + error.message);
+            }
+        }
+
+        // Reset Password
+        function openResetPasswordModal(userId, userName, userIdStr) {
+            currentResetUserId = userId;
+            document.getElementById('resetUserName').textContent = userName;
+            document.getElementById('newPassword').value = userIdStr + '123';
+            openModal('resetPasswordModal');
+        }
+
+        async function resetPassword() {
+            const newPassword = document.getElementById('newPassword').value.trim();
+
+            if (!newPassword) {
+                showToast('请输入新密码');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/api/users/${currentResetUserId}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ new_password: newPassword })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast('✅ 密码已重置');
+                    closeModal('resetPasswordModal');
+                } else {
+                    const data = await response.json();
+                    showToast('❌ 重置失败: ' + (data.detail || '未知错误'));
+                }
+            } catch (error) {
+                showToast('❌ 重置失败: ' + error.message);
+            }
+        }
+
+        // Set Admin
+        async function setAdmin(userId, isAdmin) {
+            const action = isAdmin ? '设为管理员' : '取消管理员';
+            if (!confirm(`确定要${action}吗？`)) return;
+
+            try {
+                const response = await fetch(`/admin/api/users/${userId}/admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ is_admin: isAdmin })
+                });
+
+                if (response.ok) {
+                    showToast(`✅ 已${action}`);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('❌ 操作失败');
+                }
+            } catch (error) {
+                showToast('❌ 操作失败: ' + error.message);
+            }
+        }
+
+        // Delete User
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除此用户吗？此操作不可恢复。')) return;
+
+            try {
+                const response = await fetch(`/admin/api/users/${userId}/delete`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    showToast('✅ 用户已删除');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('❌ 删除失败');
+                }
+            } catch (error) {
+                showToast('❌ 删除失败: ' + error.message);
+            }
+        }
+
+        // Batch Import
+        function openBatchImportModal() {
+            document.getElementById('excelFile').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('importBtn').disabled = true;
+            importData = [];
+            openModal('batchImportModal');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileName').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    if (jsonData.length < 2) {
+                        showToast('Excel 文件为空或格式不正确');
+                        return;
+                    }
+
+                    const headers = jsonData[0].map(h => h.toString().toLowerCase().trim());
+                    const useridIdx = headers.indexOf('userid');
+                    const nameIdx = headers.indexOf('name');
+                    const passwordIdx = headers.indexOf('password');
+
+
+                    if (useridIdx === -1 || nameIdx === -1) {
+                        showToast('Excel 格式错误：必须包含 userid 和 name 列');
+                        return;
+                    }
+
+                    importData = [];
+                    for (let i = 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        if (row[useridIdx] && row[nameIdx]) {
+                            const userid = row[useridIdx].toString().trim();
+                            const password = passwordIdx !== -1 && row[passwordIdx] ? row[passwordIdx].toString().trim() : '';
+                            importData.push({
+                                userid: userid,
+                                name: row[nameIdx].toString().trim(),
+                                password: password || (userid + '123'),
+
+                            });
+                        }
+                    }
+
+                    showPreview();
+                    document.getElementById('importBtn').disabled = false;
+
+                } catch (error) {
+                    showToast('解析 Excel 失败: ' + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showPreview() {
+            const tbody = document.getElementById('previewTableBody');
+            tbody.innerHTML = '';
+
+            const previewData = importData.slice(0, 10);
+            previewData.forEach(user => {
+                const row = document.createElement('tr');
+                const passwordDisplay = user.password === (user.userid + '123') ?
+                    '<span style="color: var(--text-muted);">默认</span>' :
+                    '<span style="color: var(--success);">自定义</span>';
+                row.innerHTML = `
+                    <td>${escapeHtml(user.userid)}</td>
+                    <td>${escapeHtml(user.name)}</td>
+                    <td>${passwordDisplay}</td>
+
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('previewSection').style.display = 'block';
+            document.getElementById('previewCount').textContent =
+                `共 ${importData.length} 条记录${importData.length > 10 ? '，显示前10条' : ''}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function downloadTemplate() {
+            const templateData = [
+                ['userid（账号，必填，英文/数字）', 'name（昵称，必填）', 'password（密码，选填，默认：账号+123）']
+            ];
+
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '用户模板');
+
+            ws['!cols'] = [
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 },
+                { wch: 15 }
+            ];
+
+            XLSX.writeFile(wb, '用户导入模板.xlsx');
+        }
+
+        async function importUsers() {
+            if (importData.length === 0) {
+                showToast('没有要导入的数据');
+                return;
+            }
+
+            if (!confirm(`确定要导入 ${importData.length} 个用户吗？`)) {
+                return;
+            }
+
+            document.getElementById('importBtn').disabled = true;
+            document.getElementById('importBtn').textContent = '导入中...';
+
+            try {
+                const response = await fetch('/admin/api/users/batch-import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ users: importData })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showToast(`✅ 导入完成！成功 ${data.created} 个，跳过 ${data.skipped} 个`);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    const data = await response.json();
+                    showToast('❌ 导入失败: ' + (data.detail || '未知错误'));
+                    document.getElementById('importBtn').disabled = false;
+                    document.getElementById('importBtn').textContent = '确认导入';
+                }
+            } catch (error) {
+                showToast('❌ 导入失败: ' + error.message);
+                document.getElementById('importBtn').disabled = false;
+                document.getElementById('importBtn').textContent = '确认导入';
+            }
+        }
+    </script>
+</body>
+</html>

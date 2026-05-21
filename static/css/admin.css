@@ -1,0 +1,469 @@
+/**
+ * Dify Portal - Admin Dashboard Styles
+ * 管理后台样式
+ */
+
+/* ==================== 页面头部 ==================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.page-title {
+    font-size: 24px;
+    color: var(--text-primary);
+}
+
+/* ==================== 统计卡片 ==================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.stat-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* ==================== 列表容器 ==================== */
+.list-container {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+/* ==================== 列表项 ==================== */
+.list-item {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    border-bottom: 1px solid var(--border-lighter);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.item-info h3 {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.item-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.item-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+/* ==================== 应用管理特有 ==================== */
+.app-list .list-item,
+.app-item {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    border-bottom: 1px solid var(--border-lighter);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.app-list .list-item:last-child,
+.app-item:last-child {
+    border-bottom: none;
+}
+
+.app-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex: 1;
+    min-width: 0;
+}
+
+.app-details h3 {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.app-details p {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.app-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.app-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.app-actions .btn-sm {
+    white-space: nowrap;
+}
+
+.connection-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.connection-online {
+    background: var(--success-bg);
+    color: var(--success-color);
+}
+
+.connection-offline {
+    background: var(--error-bg);
+    color: var(--error-color);
+}
+
+.connection-unknown {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+}
+
+.connection-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 4px;
+}
+
+.connection-online::before { background: var(--success-color); }
+.connection-offline::before { background: var(--error-color); }
+.connection-unknown::before { background: var(--text-muted); }
+
+/* ==================== 用户管理特有 ==================== */
+.user-list .list-item {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+}
+
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--info-bg);
+    color: var(--info-color);
+}
+
+/* ==================== 区块样式 ==================== */
+.section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    margin-bottom: var(--spacing-2xl);
+    box-shadow: var(--shadow-md);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ==================== 权限管理模态框 ==================== */
+.permission-modal .modal-content {
+    max-width: 600px;
+}
+
+.visibility-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.visibility-option {
+    padding: var(--spacing-lg);
+    border: 2px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.visibility-option:hover {
+    border-color: var(--primary-color);
+}
+
+.visibility-option.selected {
+    border-color: var(--primary-color);
+    background: #f0f4ff;
+}
+
+.visibility-option-radio {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.visibility-option-radio input {
+    margin-top: 2px;
+}
+
+.visibility-option-content {
+    flex: 1;
+}
+
+.visibility-option-title {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.visibility-option-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ==================== 用户权限区域 ==================== */
+.user-permission-section {
+    border-top: 1px solid var(--border-light);
+    padding-top: var(--spacing-xl);
+}
+
+.user-permission-section.hidden {
+    display: none;
+}
+
+.user-search {
+    position: relative;
+    margin-bottom: var(--spacing-md);
+}
+
+.user-search input {
+    width: 100%;
+    padding: 10px var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+}
+
+.user-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: var(--shadow-lg);
+}
+
+.user-search-item {
+    padding: 10px var(--spacing-md);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-search-item:hover {
+    background: var(--bg-secondary);
+}
+
+.user-list-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+}
+
+.user-list-item {
+    padding: var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-lighter);
+}
+
+.user-list-item:last-child {
+    border-bottom: none;
+}
+
+.user-info-small {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-info-small .user-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.user-info-small .user-dept {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.batch-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+/* ==================== 状态监控模态框 ==================== */
+.status-modal .modal-content {
+    max-width: 500px;
+}
+
+.status-info {
+    margin-bottom: var(--spacing-xl);
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-lighter);
+}
+
+.status-row:last-child {
+    border-bottom: none;
+}
+
+.status-label {
+    color: var(--text-secondary);
+}
+
+.status-value {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.error-log {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.error-log:empty::before {
+    content: '暂无错误日志';
+    color: var(--text-muted);
+}
+
+/* ==================== 批量导入预览表格 ==================== */
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-lg);
+}
+
+.preview-table th,
+.preview-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-lighter);
+    font-size: 13px;
+}
+
+.preview-table th {
+    background: var(--bg-tertiary);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+    
+    .page-title {
+        font-size: 20px;
+    }
+    
+    .list-item,
+    .app-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .item-meta,
+    .app-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .item-actions,
+    .app-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+    }
+}

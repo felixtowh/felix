@@ -1,0 +1,492 @@
+app:
+  description: ''
+  icon: '+1'
+  icon_background: '#FCE7F6'
+  icon_type: emoji
+  mode: advanced-chat
+  name: 记忆功能示例
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/moonshot:0.1.5@f787917088219dc4e74548419a79f6f542bf1eed5043e3c6684ff8e077fd79c6
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: 习惯记忆
+    id: 26cc2276-f114-40fc-9f55-d39f7228e127
+    name: xiguan
+    selector:
+    - env
+    - xiguan
+    value: 4MXkws3X18O9PPnx
+    value_type: secret
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: start
+        targetType: http-request
+      id: 1777893223504-source-1777893229243-target
+      selected: false
+      source: '1777893223504'
+      sourceHandle: source
+      target: '1777893229243'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: http-request
+        targetType: llm
+      id: 1777893229243-source-llm-target
+      selected: false
+      source: '1777893229243'
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: question-classifier
+      id: llm-source-1777895390014-target
+      selected: false
+      source: llm
+      sourceHandle: source
+      target: '1777895390014'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: llm
+      id: 1777895390014-2-1777895414175-target
+      selected: false
+      source: '1777895390014'
+      sourceHandle: '2'
+      target: '1777895414175'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: question-classifier
+        targetType: answer
+      id: 1777895390014-1777895929223-answer-target
+      selected: false
+      source: '1777895390014'
+      sourceHandle: '1777895929223'
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: answer
+      id: llm-source-answer-target
+      selected: false
+      source: llm
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: http-request
+      id: 1777895414175-source-1777896207210-target
+      selected: false
+      source: '1777895414175'
+      sourceHandle: source
+      target: '1777896207210'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: llm
+        targetType: code
+      id: 1777895414175-source-1777896581541-target
+      source: '1777895414175'
+      sourceHandle: source
+      target: '1777896581541'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: code
+        targetType: answer
+      id: 1777896581541-source-answer-target
+      source: '1777896581541'
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables: []
+      height: 72
+      id: '1777893223504'
+      position:
+        x: 0
+        y: 298
+      positionAbsolute:
+        x: 0
+        y: 298
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '用户输入：{{#sys.query#}}；
+
+            用户习惯：{{#1777893229243.body#}};
+
+            请结合以上内容回答用户问题，用户习惯仅供参考。'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: moonshot-v1-32k
+          provider: langgenius/moonshot/moonshot
+        prompt_template:
+        - id: 065b4135-40bd-4bfe-9ae3-d7847a6855f0
+          role: system
+          text: 不要回答你不知道的问题，直接告诉用户不知道，或者引导用户到其他渠道去了解。
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: llm
+      position:
+        x: 630.1428571428571
+        y: 290
+      positionAbsolute:
+        x: 630.1428571428571
+        y: 290
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#llm.text#}}
+
+
+          {{#1777896581541.result#}}'
+        selected: false
+        title: 直接回复
+        type: answer
+        variables: []
+      height: 121
+      id: answer
+      position:
+        x: 1371.2857142857142
+        y: 461.71428571428555
+      positionAbsolute:
+        x: 1371.2857142857142
+        y: 461.71428571428555
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config:
+            api_key: '{{#env.xiguan#}}'
+            header: X-Portal-Key
+            type: custom
+          type: api-key
+        body:
+          data: []
+          type: none
+        headers: X-Portal-User-Id:{{#sys.user_id#}}
+        method: get
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: HTTP 请求
+        type: http-request
+        url: https://difyportal.towh.cn/api/external/memories?format=text
+        variables: []
+      height: 152
+      id: '1777893229243'
+      position:
+        x: 342
+        y: 258
+      positionAbsolute:
+        x: 342
+        y: 258
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        classes:
+        - id: '2'
+          name: 用户明确表达了新的习惯、喜好、偏好，或修改/删除已有习惯（如"我喜欢..."、"记住..."、"以后都..."、"忘掉..."）
+        - id: '1777895929223'
+          name: 用户只是正常提问、闲聊、咨询业务问题，没有表达任何新的个人习惯、偏好或重要信息
+        instruction: 判断用户是否有存档习惯的需求
+        instructions: ''
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+
+            {{#sys.files#}}'
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: moonshot-v1-8k
+          provider: langgenius/moonshot/moonshot
+        query_variable_selector:
+        - '1777893223504'
+        - sys.query
+        selected: false
+        title: 问题分类器
+        type: question-classifier
+        vision:
+          enabled: false
+      height: 169
+      id: '1777895390014'
+      position:
+        x: 921.1428571428571
+        y: 71.85714285714286
+      positionAbsolute:
+        x: 921.1428571428571
+        y: 71.85714285714286
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '{{#sys.query#}}
+
+            '
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 3
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: moonshot-v1-8k
+          provider: langgenius/moonshot/moonshot
+        prompt_template:
+        - id: 741ee30f-c5a6-4fc8-983b-3952485226f7
+          role: system
+          text: '请分析3轮对话，提取用户明确表达的新习惯、偏好或重要个人信息。
+
+            规则：
+
+            1. 只关注 [用户] 标记的内容，忽略 [AI] 标记的内容；
+
+            2. 提取用户明确表达的、之前未提及的新信息；
+
+            3. 返回内容只输出关键词，不要解释、不要标点、不要多余文字；
+
+            4. 如果没有新习惯，返回空值""；'
+        - id: 1e0d580b-ecb5-4fbf-83db-a5ff163b806f
+          role: assistant
+          text: ''
+        selected: false
+        title: 习惯总结
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '1777895414175'
+      position:
+        x: 1252.1428571428573
+        y: 209.57142857142856
+      positionAbsolute:
+        x: 1252.1428571428573
+        y: 209.57142857142856
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        authorization:
+          config:
+            api_key: '{{#env.xiguan#}}'
+            header: X-Portal-Key
+            type: custom
+          type: api-key
+        body:
+          data:
+          - id: key-value-271
+            key: ''
+            type: text
+            value: "{\n  \"action\": \"add\",\n  \"content\": \"{{#1777895414175.text#}}\"\
+              \n}"
+          type: json
+        headers: 'Content-Type:application/json
+
+          X-Portal-User-Id:{{#sys.user_id#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 3
+          retry_enabled: true
+          retry_interval: 100
+        selected: true
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 0
+          max_read_timeout: 0
+          max_write_timeout: 0
+        title: 新增习惯
+        type: http-request
+        url: https://difyportal.towh.cn/api/external/memory
+        variables: []
+      height: 136
+      id: '1777896207210'
+      position:
+        x: 1619.8571428571427
+        y: 71.85714285714286
+      positionAbsolute:
+        x: 1619.8571428571427
+        y: 71.85714285714286
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        code: "def main(text: str) -> dict:\n    return {\n        \"result\": \"\
+          新增习惯：\" + text + \"（可前往“我的习惯”习惯页面查看或编辑）\"\n    }"
+        code_language: python3
+        outputs:
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 习惯回复完整
+        type: code
+        variables:
+        - value_selector:
+          - '1777895414175'
+          - text
+          value_type: string
+          variable: text
+      height: 51
+      id: '1777896581541'
+      position:
+        x: 1591.7142857142858
+        y: 265.99999999999994
+      positionAbsolute:
+        x: 1591.7142857142858
+        y: 265.99999999999994
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    viewport:
+      x: -182.74999999999977
+      y: 42.200000000000045
+      zoom: 0.7
+  rag_pipeline_variables: []

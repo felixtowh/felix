@@ -1,0 +1,375 @@
+{% extends "admin/base.html" %}
+{% set active_nav = 'bots' %}
+{% block title %}Bot 管理{% endblock %}
+{% block extra_css %}
+    /* ===== Layout ===== */
+    .page{margin:0 auto;max-width:1200px}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+    .toolbar h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.3px;color:var(--text-primary)}
+    .toolbar .muted{font-size:12px;color:var(--text-muted)}
+
+    /* ===== Stats Bar ===== */
+    .stats-bar{display:flex;margin-bottom:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+    .stats-bar .item{flex:1;text-align:center;padding:18px 16px;border-right:1px solid var(--border)}
+    .stats-bar .item:last-child{border-right:none}
+    .stats-bar .v{font-size:26px;font-weight:700;color:var(--text-primary);line-height:1.2}
+    .stats-bar .l{font-size:11px;color:var(--text-muted);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.6px}
+
+    /* ===== Panel ===== */
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:24px}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border)}
+    .panel-header h2{margin:0;font-size:15px;font-weight:600;color:var(--text-primary);letter-spacing:-.2px}
+    .panel-header .count{font-size:12px;color:var(--text-muted);font-weight:400;margin-left:6px}
+    .panel-body{padding:0}
+
+    /* ===== Table ===== */
+    table.tbl{width:100%;border-collapse:collapse}
+    table.tbl th{padding:10px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);font-weight:600;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+    table.tbl th.th-r{text-align:right}
+    table.tbl td{padding:14px 16px;font-size:13px;color:var(--text-primary);border-bottom:1px solid var(--border);vertical-align:middle}
+    table.tbl tr:last-child td{border-bottom:none}
+    table.tbl tbody tr:hover td{background:rgba(0,0,0,.015)}
+    .cell-mono{font-family:'SF Mono','Monaco','Menlo',monospace;font-size:12px;color:var(--text-secondary)}
+    .cell-muted{color:var(--text-muted)}
+    .cell-strong{font-weight:600}
+
+    /* ===== Status Badge ===== */
+    .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+    .badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .badge-ok{background:#ecfdf5;color:#065f46}.badge-ok .badge-dot{background:#10b981}
+    .badge-err{background:#fef2f2;color:#991b1b}.badge-err .badge-dot{background:#ef4444}
+    .badge-warn{background:#fffbeb;color:#92400e}.badge-warn .badge-dot{background:#f59e0b}
+    .badge-muted{background:#f8fafc;color:#64748b}.badge-muted .badge-dot{background:#94a3b8}
+
+    /* ===== Buttons ===== */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;line-height:1;white-space:nowrap;border:none;text-decoration:none}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{opacity:.9}
+    .btn-ghost{background:transparent;color:var(--text-secondary);padding:6px 10px}
+    .btn-ghost:hover{background:var(--surface-hover);color:var(--text-primary)}
+    .btn-outline{background:transparent;color:var(--text-secondary);border:1px solid var(--border)}
+    .btn-outline:hover{background:var(--surface-hover);border-color:var(--text-muted);color:var(--text-primary)}
+    .btn-danger{background:transparent;color:#dc2626}
+    .btn-danger:hover{background:#fef2f2}
+    .btn-secondary{background:var(--surface-hover);color:var(--text-secondary)}
+    .btn-secondary:hover{background:var(--border);color:var(--text-primary)}
+
+    /* ===== Modal ===== */
+    .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:999;backdrop-filter:blur(2px)}
+    .modal{background:var(--surface);border-radius:var(--radius-lg);padding:28px;width:500px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.1)}
+    .modal h3{font-size:16px;font-weight:600;margin-bottom:22px;letter-spacing:-.2px}
+    .fg{margin-bottom:16px}
+    .fg label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+    .fg input,.fg select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;background:var(--surface);color:var(--text-primary);box-sizing:border-box;transition:border-color .15s}
+    .fg input:focus,.fg select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+    .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:24px}
+
+    /* ===== Toast ===== */
+    .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;color:#fff;opacity:0;transform:translateY(-12px);transition:all .2s;z-index:9999;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.1)}
+    .toast.on{opacity:1;transform:translateY(0)}
+    .ts-ok{background:#059669}.ts-err{background:#dc2626}
+
+    @media(max-width:768px){
+        .stats-bar{flex-wrap:wrap}
+        .stats-bar .item{flex:1 1 33%;border-bottom:1px solid var(--border)}
+        .page{padding:0 8px}
+    }
+{% endblock %}
+{% block content %}
+<div class="page">
+
+<div class="toolbar">
+    <h1>Bot 管理</h1>
+    <span class="muted" id="updateTime"></span>
+</div>
+
+<div class="stats-bar">
+    <div class="item"><div class="v" id="botCount">-</div><div class="l">Bot 总数</div></div>
+    <div class="item"><div class="v" id="botOnline">-</div><div class="l">在线</div></div>
+    <div class="item"><div class="v" id="botDifyOk">-</div><div class="l">Dify 连通</div></div>
+    <div class="item"><div class="v" id="totalMsgs">-</div><div class="l">累计对话</div></div>
+    <div class="item"><div class="v" id="totalTokens">-</div><div class="l">累计 Token</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Bot 列表 -->
+<div class="panel">
+    <div class="panel-header">
+        <h2>企业微信 Bot<span class="count" id="botCnt"></span></h2>
+        <button class="btn btn-primary" onclick="showBotModal()">添加 Bot</button>
+    </div>
+    <div class="panel-body" style="overflow-x:auto">
+        <table class="tbl">
+            <thead>
+                <tr><th>名称</th><th>Bot ID</th><th>绑定应用</th><th class="th-r">WeCom</th><th class="th-r">Dify</th><th class="th-r">操作</th></tr>
+            </thead>
+            <tbody id="bot-tbody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:32px">加载中...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Dify 列表 -->
+<div class="panel">
+    <div class="panel-header">
+        <h2>Dify 应用<span class="count" id="difyCnt"></span></h2>
+        <button class="btn btn-primary" onclick="showDifyModal()">添加应用</button>
+    </div>
+    <div class="panel-body" style="overflow-x:auto">
+        <table class="tbl">
+            <thead>
+                <tr><th>名称</th><th>API Key</th><th>Endpoint</th><th class="th-r">状态</th><th class="th-r">连通</th><th class="th-r">Bot</th><th class="th-r">操作</th></tr>
+            </thead>
+            <tbody id="dify-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:32px">加载中...</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<!-- Bot Modal -->
+<div class="modal-overlay" id="bot-modal" style="display:none" onclick="if(event.target===this)hideBotModal()">
+<div class="modal">
+<h3 id="bot-modal-title">添加 Bot</h3>
+<form id="bot-form" onsubmit="saveBot(event)">
+  <div class="fg"><label>名称</label><input name="name" placeholder="例如：客服Bot"/></div>
+  <div class="fg-row">
+    <div class="fg"><label>Bot ID</label><input name="bot_id" placeholder="企微 Bot ID" required/></div>
+    <div class="fg"><label>Secret</label><input name="secret" placeholder="企微 Secret" required/></div>
+  </div>
+  <div class="fg"><label>绑定 Dify 应用</label><select name="dify_app_id"><option value="">-- 选择 Dify 应用 --</option></select></div>
+  <input type="hidden" name="bot_pk" value=""/>
+  <div class="modal-actions">
+    <button type="button" class="btn btn-secondary" onclick="hideBotModal()">取消</button>
+    <button type="submit" class="btn btn-primary">保存</button>
+  </div>
+</form>
+</div></div>
+
+<!-- Dify Modal -->
+<div class="modal-overlay" id="dify-modal" style="display:none" onclick="if(event.target===this)hideDifyModal()">
+<div class="modal">
+<h3 id="dify-modal-title">添加 Dify 应用</h3>
+<form id="dify-form" onsubmit="saveDify(event)">
+  <div class="fg"><label>名称</label><input name="name" placeholder="例如：客服Dify"/></div>
+  <div class="fg"><label>API Key</label><input name="api_key" placeholder="app-xxxxxxxx" required/></div>
+  <div class="fg"><label>Base URL</label><input name="base_url" placeholder="https://api.dify.ai/v1" value="https://api.dify.ai/v1"/></div>
+  <input type="hidden" name="app_pk" value=""/>
+  <div class="modal-actions">
+    <button type="button" class="btn btn-ghost" onclick="testDifyFromModal()">测试连接</button>
+    <button type="button" class="btn btn-secondary" onclick="hideDifyModal()">取消</button>
+    <button type="submit" class="btn btn-primary">保存</button>
+  </div>
+</form>
+</div></div>
+
+<script>
+// 格式化：>=1M → x.xM, >=1K → x.xK, <1K → 原值
+function N(n){var v=Number(n);if(!v)return'0';if(v>=1e6)return(v/1e6).toFixed(1)+'M';if(v>=1e3)return(v/1e3).toFixed(1)+'K';return String(v)}
+function E(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function T(t,ok){var e=document.getElementById('toast');e.textContent=t;e.className='toast '+(ok?'ts-ok':'ts-err');e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('on')},2600)}
+function mk(k){if(!k)return'';if(k.length<=10)return k;return k.substring(0,6)+'···'+k.substring(k.length-2)}
+
+function badgeW(s,c){
+  if(c) return'<span class="badge badge-ok"><span class="badge-dot"></span>在线</span>';
+  if(s==='connecting') return'<span class="badge badge-warn"><span class="badge-dot"></span>连接中</span>';
+  if(s==='auth_failed') return'<span class="badge badge-err"><span class="badge-dot"></span>认证失败</span>';
+  if(s==='disconnected') return'<span class="badge badge-err"><span class="badge-dot"></span>已断开</span>';
+  if(s==='stopped') return'<span class="badge badge-muted"><span class="badge-dot"></span>已停止</span>';
+  return'<span class="badge badge-muted"><span class="badge-dot"></span>'+E(s)+'</span>';
+}
+function badgeDB(b,ch){
+  if(!b.dify_app) return'<span class="badge badge-muted"><span class="badge-dot"></span>未绑定</span>';
+  if(ch[b.dify_app.id]==='ok') return'<span class="badge badge-ok"><span class="badge-dot"></span>连通</span>';
+  if(ch[b.dify_app.id]==='fail') return'<span class="badge badge-err"><span class="badge-dot"></span>不通</span>';
+  return'<span class="badge badge-muted"><span class="badge-dot"></span>未测</span>';
+}
+function badgeDA(r){return r==='ok'?'<span class="badge badge-ok"><span class="badge-dot"></span>连通</span>':r==='fail'?'<span class="badge badge-err"><span class="badge-dot"></span>不通</span>':'<span class="badge badge-muted"><span class="badge-dot"></span>未测</span>';}
+function badgeDE(en){return en?'<span class="badge badge-ok"><span class="badge-dot"></span>启用</span>':'<span class="badge badge-muted"><span class="badge-dot"></span>停用</span>';}
+
+var C={},testing=false;
+
+// ========== 渲染 ==========
+
+function renderBots(bots){
+  var on=0,dk=0,h='';
+  bots.forEach(function(b){
+    if(b.connected) on++;
+    var db=badgeDB(b,C);if(db.indexOf('badge-ok')>=0) dk++;
+    var n=b.dify_app?E(b.dify_app.name||'App #'+b.dify_app.id):'<span class="cell-muted">—</span>';
+    h+='<tr>';
+    h+='<td><span class="cell-strong">'+E(b.name||'Bot #'+b.id)+'</span></td>';
+    h+='<td><span class="cell-mono" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">'+E(b.bot_id)+'</span></td>';
+    h+='<td><span style="font-size:13px">'+n+'</span></td>';
+    h+='<td style="text-align:right">'+badgeW(b.status,b.connected)+'</td>';
+    h+='<td style="text-align:right">'+db+'</td>';
+    h+='<td style="text-align:right"><div style="display:inline-flex;align-items:center;gap:4px">';
+    if(b.connected) h+='<button class="btn btn-outline" onclick="BA('+b.id+',\'stop\')">停止</button>';
+    else h+='<button class="btn btn-outline" onclick="BA('+b.id+',\'start\')">启动</button>';
+    h+='<button class="btn btn-ghost" onclick="editBot('+b.id+')">编辑</button>';
+    if(b.dify_app) h+='<button class="btn btn-ghost" onclick="TBD('+b.id+','+b.dify_app.id+')">测试</button>';
+    h+='<button class="btn btn-danger" onclick="delBot('+b.id+')">删除</button>';
+    h+='</div></td></tr>';
+  });
+  if(!bots.length) h='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:48px;font-size:13px">暂无 Bot，点击「添加 Bot」开始配置</td></tr>';
+  document.getElementById('bot-tbody').innerHTML=h;
+  document.getElementById('botCnt').textContent='· '+bots.length;
+  document.getElementById('botCount').textContent=bots.length;
+  document.getElementById('botOnline').textContent=on;
+  document.getElementById('botDifyOk').textContent=dk;
+}
+
+function renderDifyApps(apps){
+  var h='';
+  apps.forEach(function(a){
+    var tr=C[a.id]||'unknown';
+    h+='<tr>';
+    h+='<td><span class="cell-strong">'+E(a.name||'App #'+a.id)+'</span></td>';
+    h+='<td><span class="cell-mono" title="'+E(a.api_key)+'">'+E(mk(a.api_key))+'</span></td>';
+    h+='<td><span class="cell-mono cell-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">'+E(a.base_url)+'</span></td>';
+    h+='<td style="text-align:right">'+badgeDE(a.enabled)+'</td>';
+    h+='<td style="text-align:right">'+badgeDA(tr)+'</td>';
+    h+='<td style="text-align:right"><strong>'+N(a.bot_count)+'</strong></td>';
+    h+='<td style="text-align:right"><div style="display:inline-flex;align-items:center;gap:4px">';
+    h+='<button class="btn btn-outline" onclick="DTA('+a.id+')">'+ (a.enabled?'停用':'启用') +'</button>';
+    h+='<button class="btn btn-ghost" onclick="editDify('+a.id+')">编辑</button>';
+    h+='<button class="btn btn-ghost" onclick="TDA('+a.id+')">测试</button>';
+    h+='<button class="btn btn-danger" onclick="delDify('+a.id+')">删除</button>';
+    h+='</div></td></tr>';
+  });
+  if(!apps.length) h='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:48px;font-size:13px">暂无 Dify 应用，点击「添加应用」</td></tr>';
+  document.getElementById('dify-tbody').innerHTML=h;
+  document.getElementById('difyCnt').textContent='· '+apps.length;
+}
+
+// ========== Dify 连通测试 ==========
+
+function _test(id,key,url){
+  return fetch('/admin/api/test-dify?api_key='+encodeURIComponent(key)+'&base_url='+encodeURIComponent(url),{credentials:'include'})
+    .then(function(r){return r.json()}).then(function(d){C[id]=d.ok?'ok':'fail';return d.ok});
+}
+function TDA(id){
+  fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(apps){
+    var a=apps.find(function(x){return x.id===id});if(!a)return;
+    _test(id,a.api_key,a.base_url).then(function(ok){T('连通成功',ok);refresh()});
+  });
+}
+function TBD(bid,did){
+  fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(apps){
+    var a=apps.find(function(x){return x.id===did});if(!a)return;
+    _test(did,a.api_key,a.base_url).then(function(ok){T(ok?'连通成功':'连接失败',ok);refresh()});
+  });
+}
+function autoTest(){
+  if(testing)return;
+  fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(apps){
+    if(!Array.isArray(apps)||!apps.length)return;
+    testing=true;var i=0;
+    function nx(){if(i>=apps.length){testing=false;refresh();return}
+      var a=apps[i++];_test(a.id,a.api_key,a.base_url).finally(function(){setTimeout(nx,800)})}
+    nx();
+  });
+}
+
+// ========== 数据加载 ==========
+
+function loadGlobalStats(){
+  fetch('/admin/api/bot-stats',{credentials:'include'}).then(function(r){return r.json()}).then(function(s){
+    document.getElementById('totalMsgs').textContent=N(s.total_messages);
+    document.getElementById('totalTokens').textContent=N(s.total_tokens);
+  });
+}
+
+function loadStats(){
+  loadGlobalStats();
+  fetch('/admin/api/bots',{credentials:'include'}).then(function(r){return r.json()}).then(function(bots){
+    if(!Array.isArray(bots)) return;
+    renderBots(bots);
+  });
+  fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(a){if(Array.isArray(a)) renderDifyApps(a)});
+  document.getElementById('updateTime').textContent=new Date().toLocaleTimeString();
+}
+
+function refresh(){
+  loadGlobalStats();
+  fetch('/admin/api/bots',{credentials:'include'}).then(function(r){return r.json()}).then(function(bots){
+    if(!Array.isArray(bots)) return;
+    renderBots(bots);
+  });
+  fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(a){if(Array.isArray(a)) renderDifyApps(a)});
+  document.getElementById('updateTime').textContent=new Date().toLocaleTimeString();
+}
+
+// ========== 操作 ==========
+
+function BA(id,act){
+  fetch('/admin/api/bots/'+id+'/'+act,{method:'POST',credentials:'include'}).then(function(r){return r.json()}).then(function(d){T(d.message,d.success);setTimeout(refresh,600)});
+}
+function delBot(id){
+  if(!confirm('确认删除 Bot #'+id+'？'))return;
+  fetch('/admin/api/bots/'+id,{method:'DELETE',credentials:'include'}).then(function(r){return r.json()}).then(function(d){T(d.message,d.success);setTimeout(refresh,600)});
+}
+function DTA(id){
+  fetch('/admin/api/dify-apps/'+id+'/toggle',{method:'POST',credentials:'include'}).then(function(r){return r.json()}).then(function(d){T(d.message,d.success);setTimeout(refresh,600)});
+}
+function delDify(id){
+  if(!confirm('确认删除 Dify App #'+id+'？关联 Bot 将解绑'))return;
+  fetch('/admin/api/dify-apps/'+id,{method:'DELETE',credentials:'include'}).then(function(r){return r.json()}).then(function(d){T(d.message,d.success);setTimeout(refresh,600)});
+}
+
+// Bot Modal
+function showBotModal(pk){
+  document.getElementById('bot-modal-title').textContent=pk?'编辑 Bot':'添加 Bot';
+  document.getElementById('bot-modal').style.display='flex';
+  document.getElementById('bot-form').reset();
+  document.querySelector('[name="bot_pk"]').value=pk||'';
+  Promise.all([
+    fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}),
+    pk?fetch('/admin/api/bots',{credentials:'include'}).then(function(r){return r.json()}):Promise.resolve(null)
+  ]).then(function(r){
+    var apps=r[0],bots=r[1],sel=document.querySelector('[name="dify_app_id"]');
+    sel.innerHTML='<option value="">-- 选择 Dify 应用 --</option>';
+    if(Array.isArray(apps)) apps.forEach(function(a){sel.innerHTML+='<option value="'+a.id+'">'+(a.name||'App #'+a.id)+'</option>'});
+    if(bots&&Array.isArray(bots)){var b=bots.find(function(x){return x.id===pk});if(b){document.querySelector('[name="name"]').value=b.name||'';document.querySelector('[name="bot_id"]').value=b.bot_id||'';document.querySelector('[name="secret"]').value=b.secret||'';if(b.dify_app) sel.value=b.dify_app.id}}
+  });
+}
+function hideBotModal(){document.getElementById('bot-modal').style.display='none'}
+function saveBot(e){
+  e.preventDefault();var fd=new FormData(e.target),body={};
+  fd.forEach(function(v,k){if(v||k==='dify_app_id')body[k]=v});
+  var pk=body.bot_pk;delete body.bot_pk;body.enabled=1;
+  fetch('/admin/api/bots'+(pk?'/'+pk:''),{method:pk?'PUT':'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)})
+    .then(function(r){return r.json()}).then(function(d){T(d.message,d.success);if(d.success){hideBotModal();setTimeout(refresh,600)}});
+}
+function editBot(pk){showBotModal(pk)}
+
+// Dify Modal
+function showDifyModal(pk){
+  document.getElementById('dify-modal-title').textContent=pk?'编辑 Dify 应用':'添加 Dify 应用';
+  document.getElementById('dify-modal').style.display='flex';
+  document.getElementById('dify-form').reset();
+  document.querySelector('[name="app_pk"]').value=pk||'';
+  if(pk){fetch('/admin/api/dify-apps',{credentials:'include'}).then(function(r){return r.json()}).then(function(apps){var a=apps.find(function(x){return x.id===pk});if(a){document.querySelector('[name="name"]').value=a.name||'';document.querySelector('[name="api_key"]').value=a.api_key||'';document.querySelector('[name="base_url"]').value=a.base_url||''}})}
+}
+function hideDifyModal(){document.getElementById('dify-modal').style.display='none'}
+function saveDify(e){
+  e.preventDefault();var fd=new FormData(e.target),body={};
+  fd.forEach(function(v,k){if(v)body[k]=v});
+  var pk=body.app_pk;delete body.app_pk;body.enabled=1;
+  fetch('/admin/api/dify-apps'+(pk?'/'+pk:''),{method:pk?'PUT':'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(body)})
+    .then(function(r){return r.json()}).then(function(d){T(d.message,d.success);if(d.success){hideDifyModal();delete C[pk];setTimeout(refresh,600)}});
+}
+function editDify(pk){showDifyModal(pk)}
+function testDifyFromModal(){
+  var k=document.querySelector('[name="api_key"]').value,u=document.querySelector('[name="base_url"]').value||'https://api.dify.ai/v1';
+  if(!k){T('请输入 API Key');return}_test(0,k,u).then(function(ok){T(ok?'连通成功':'连接失败',ok)});
+}
+
+loadStats();
+setTimeout(autoTest,2000);
+setInterval(refresh,15000);
+setInterval(autoTest,300000);
+</script>
+{% endblock %}

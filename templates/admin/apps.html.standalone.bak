@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="turbo-cache-control" content="no-cache">
+    <title>应用管理 - Dify Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --surface-hover: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius: 12px;
+            --radius-lg: 16px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #0f172a;
+                --surface: #1e293b;
+                --surface-hover: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --text-muted: #64748b;
+                --border: #334155;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        /* Header */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .nav a:hover {
+            color: var(--primary);
+            background: var(--surface-hover);
+        }
+
+        .nav a.active {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+            background: var(--surface-hover);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--surface-hover);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .user-info:hover {
+            background: var(--border);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            min-width: 150px;
+            display: none;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .user-dropdown-item:first-child {
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+
+        .user-dropdown-item:last-child {
+            border-radius: 0 0 var(--radius) var(--radius);
+            color: var(--danger);
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title-group h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .page-title-group p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        /* App List */
+        .app-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .app-item {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s;
+        }
+
+        .app-item:last-child {
+            border-bottom: none;
+        }
+
+        .app-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .app-item.home-app {
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.08) 0%, transparent 100%);
+            border-left: 4px solid var(--warning);
+        }
+
+        .app-item.home-app .app-details h3 {
+            font-weight: 700;
+            color: var(--warning);
+        }
+
+        .app-item.home-app .app-details h3::before {
+            content: '🏠 ';
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .app-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            flex-shrink: 0;
+        }
+
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--radius);
+        }
+
+        .app-details {
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .app-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-details p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .connection-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .connection-online {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .connection-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .connection-unknown {
+            background: var(--surface-hover);
+            color: var(--text-muted);
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .app-actions .btn-sm {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .app-actions a {
+            text-decoration: none !important;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--surface-hover);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            margin: 0 auto 24px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xl);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-muted);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--surface-hover);
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            max-height: calc(85vh - 160px);
+            min-height: 200px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            background: var(--surface);
+            color: var(--text-primary);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .checkbox-label input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        .toggle {
+            position: relative; width: 52px; height: 28px;
+            flex-shrink: 0; cursor: pointer;
+        }
+        .toggle input {
+            position: absolute; opacity: 0; width: 0; height: 0;
+        }
+        .toggle .track {
+            position: absolute; inset: 0;
+            background: #d1d5db; border-radius: 28px;
+            transition: background 0.25s;
+        }
+        .toggle .track::after {
+            content: ''; position: absolute;
+            width: 22px; height: 22px;
+            background: white; border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .toggle input:checked + .track { background: #22c55e; }
+        .toggle input:checked + .track::after { transform: translateX(24px); }
+
+        .modal-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Permission Modal */
+        .permission-modal .modal-content {
+            max-width: 600px;
+        }
+
+        .visibility-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .visibility-option {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .visibility-option:hover {
+            border-color: var(--primary-light);
+        }
+
+        .visibility-option.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .visibility-option-radio {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .visibility-option-radio input {
+            margin-top: 2px;
+        }
+
+        .visibility-option-content {
+            flex: 1;
+        }
+
+        .visibility-option-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .visibility-option-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .user-permission-section {
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+
+        .user-permission-section.hidden {
+            display: none;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .user-search {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .user-search input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+        }
+
+        .user-search-results {
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-top: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 9999;
+            box-shadow: var(--shadow-xl);
+            display: none;
+            min-width: 300px;
+        }
+
+        .user-search {
+            position: static;
+            margin-bottom: 16px;
+        }
+
+        .user-search-results.active {
+            display: block;
+        }
+
+        .user-list {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .user-list-item {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .user-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info-small {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info-small .name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-info-small .dept {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* User Grid for Permission Selection */
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding: 4px;
+            margin-top: 12px;
+        }
+
+        .user-grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 14px 6px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--surface);
+            position: relative;
+            user-select: none;
+        }
+
+        .user-grid-item:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .user-grid-item.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .user-grid-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .user-grid-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .user-grid-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .user-grid-userid {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .selected-count {
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Status Modal */
+        .status-modal .modal-content {
+            max-width: 480px;
+        }
+
+        .status-info {
+            margin-bottom: 24px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .error-log {
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .error-log:empty::before {
+            content: '暂无错误日志';
+            color: var(--text-muted);
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: inline-flex;
+            background: var(--surface-hover);
+            border-radius: var(--radius);
+            padding: 4px;
+            border: 1px solid var(--border);
+        }
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .view-btn:hover { color: var(--primary); }
+        .view-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* List View Table */
+        .list-view { display: none; }
+        .list-view.active { display: block; }
+        .apps-table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .apps-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .apps-table thead th {
+            background: var(--surface-hover);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        .apps-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+        .apps-table tbody tr:hover { background: var(--surface-hover); }
+        .apps-table tbody tr:last-child td { border-bottom: none; }
+
+        .app-cell { display: flex; align-items: center; gap: 12px; }
+        .app-cell img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+        .app-cell .name { font-weight: 600; color: var(--text-primary); }
+        .app-cell .id { font-size: 12px; color: var(--text-muted); }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 100px; font-size: 12px; font-weight: 600;
+            cursor: pointer; user-select: none; transition: all 0.15s; border: none;
+        }
+        .badge:hover { opacity: 0.8; }
+        .badge.on { background: #d1fae5; color: #065f46; }
+        .badge.off { background: #f3f4f6; color: #6b7280; }
+        .badge.warn { background: #fef3c7; color: #92400e; }
+        .badge.disabled { opacity: 0.45; cursor: not-allowed; background: #e5e7eb !important; color: #9ca3af !important; filter: grayscale(1); }
+
+        .text-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+        .text-truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .text-intro { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-secondary); }
+        .text-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+        .actions-cell { display: flex; gap: 8px; }
+        .btn-sm-table {
+            padding: 6px 12px; border-radius: 8px; font-size: 12px;
+            border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary);
+            cursor: pointer; text-decoration: none; display: inline-flex; align-items: center;
+            transition: all 0.15s;
+        }
+        .btn-sm-table:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .view-toggle { display: none; }
+            .apps-table { display: block; overflow-x: auto; }
+            .header { padding: 0 16px; }
+            .header-content { height: 56px; }
+            .header-left { gap: 12px; }
+            .logo h1 { font-size: 16px; }
+            .logo-icon { width: 36px; height: 36px; }
+            .nav { gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; scrollbar-width: none; }
+            .nav::-webkit-scrollbar { display: none; }
+            .nav a { font-size: 12px; padding: 6px 12px; white-space: nowrap; }
+            .back-link span { display: none; }
+            .back-link { padding: 8px; }
+            .user-info span { display: none; }
+            .user-info { padding: 6px; }
+            .user-avatar { width: 32px; height: 32px; font-size: 14px; }
+            .container { padding: 16px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .page-title-group h2 { font-size: 20px; }
+            .app-item { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
+            .app-meta { width: 100%; justify-content: space-between; }
+            .app-actions { width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px 6px; }
+            .app-actions .btn-sm { min-height: 44px; }
+            .modal-content { margin: 10px; max-height: 95vh; width: 100%; max-width: calc(100vw - 20px); }
+            .btn { padding: 10px 16px; font-size: 13px; min-height: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon"><img src="/static/images/debo-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='⚙️';this.parentElement.style.background='linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%)'"></div>
+                    <h1>管理后台</h1>
+                </div>
+                <nav class="nav">
+                    <a href="/admin">概览</a>
+                    <a href="/admin/apps" class="active">应用管理</a>
+                    <a href="/admin/users">用户管理</a>
+                    <a href="/admin/stats">使用统计</a>
+                    <a href="/admin/settings">功能扩展</a>
+                    <a href="/admin/wecom-bot">Bot 管理</a>
+                </nav>
+            </div>
+            <div class="user-section">
+                <a href="/" class="back-link" target="portal_tab">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    返回前台
+                </a>
+                <div class="user-info" onclick="toggleUserDropdown()">
+                    <div class="user-avatar">{{ user.name[-1] }}</div>
+                    <span>{{ user.name }}</span>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-dropdown-item" onclick="window.open('/', 'portal_tab')">返回前台</div>
+                        <div class="user-dropdown-item" onclick="logout()">退出登录</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="page-title-group">
+                <h2 id="pageTitle">应用管理</h2>
+                <p id="pageDesc">管理 Dify 应用接入配置</p>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center;">
+                <div class="view-toggle">
+                    <button class="view-btn active" id="btnCardView" onclick="switchView('card')">📋 卡片视图</button>
+                    <button class="view-btn" id="btnListView" onclick="switchView('list')">📊 列表视图</button>
+                </div>
+                <button class="btn btn-primary" onclick="showModal()">
+                    <span>+</span>
+                    <span>添加应用</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 卡片视图 -->
+        <div class="app-list" id="cardView">
+            {% if apps %}
+                {% for app in apps %}
+                <div class="app-item{{ ' home-app' if app.is_home_app else '' }}">
+                    <div class="app-info">
+                        {% if app.logo_url %}
+                        <div class="app-icon" style="background: transparent;">
+                            <img src="{{ app.logo_url }}" alt="{{ app.name }}">
+                        </div>
+                        {% else %}
+                        <div class="app-icon" style="background: transparent;">
+                            <img src="/static/images/debo-logo.png" alt="{{ app.name }}">
+                        </div>
+                        {% endif %}
+                        <div class="app-details">
+                            <h3>{{ app.name }}</h3>
+                            <p>{{ app.welcome_message or '暂无描述' }} · {{ app.base_url or 'http://dify.towh.cn' }} · 创建于 {{ app.created_at }}</p>
+                        </div>
+                    </div>
+                    <div class="app-meta">
+                        {% if app.is_active %}
+                        <span class="status-badge status-active">
+                            <span>🔒</span> 运行中
+                        </span>
+                        {% else %}
+                        <span class="status-badge status-inactive">
+                            <span>⛔</span> 已停用
+                        </span>
+                        {% endif %}
+                        <span class="connection-badge connection-unknown" id="connection-{{ app.id }}" style="cursor: pointer;" onclick="testConnection({{ app.id }})" title="点击刷新连接状态">检测中...</span>
+                        <div class="app-actions">
+                            <a href="/admin/apps/{{ app.id }}/detail" class="btn btn-sm btn-secondary" title="查看详情">📋 详情</a>
+                            <button class="btn btn-sm btn-secondary" onclick="managePermissions({{ app.id }}, '{{ app.name }}')">权限</button>
+                            <button class="btn btn-sm btn-secondary" onclick="editApp({{ app.id }}, '{{ app.name }}', '{{ app.api_key }}', '{{ app.base_url or '' }}', '{{ app.welcome_message or '' }}', {{ app.is_active|lower }}, '{{ app.logo_url or '' }}', {{ app.skip_ssl_verify|lower if app.skip_ssl_verify is not none else 'false' }}, {{ app.is_home_app|lower if app.is_home_app is not none else 'false' }}, {{ app.enable_memory|lower if app.enable_memory is not none else 'false' }}, {{ app.enable_thinking|lower if app.enable_thinking is not none else 'false' }}, {{ app.enable_instant_reply|lower if app.enable_instant_reply is not none else 'false' }})">编辑</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteApp({{ app.id }})">删除</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <div class="empty-title">暂无应用</div>
+                    <p>点击右上角按钮添加第一个应用</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- 列表视图 -->
+        <div class="list-view" id="listView">
+            <div class="apps-table-wrap">
+                <table class="apps-table">
+                    <thead>
+                        <tr>
+                            <th>应用</th>
+                            <th>启用</th>
+                            <th>首页</th>
+                            <th>习惯</th>
+                            <th>思考</th>
+                            <th>瞬时</th>
+                            <th>跳过SSL</th>
+                            <th>API Key</th>
+                            <th>服务器地址</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in apps %}
+                        <tr data-app-id="{{ app.id }}">
+                            <td>
+                                <div class="app-cell">
+                                    <img src="{{ app.logo_url or '/static/images/debo-logo.png' }}" alt="" onerror="this.src='/static/images/debo-logo.png'">
+                                    <div>
+                                        <div class="name">{{ app.name }}</div>
+                                        <div class="id">ID: {{ app.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="badge {{ 'on' if app.is_active else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'is_active', {{ 'false' if app.is_active else 'true' }}, '启用状态')">
+                                    {{ '✓ 已启用' if app.is_active else '— 已停用' }}
+                                </button>
+                            </td>
+                            <td>
+                                <button class="badge {{ 'on' if app.is_home_app else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'is_home_app', {{ 'false' if app.is_home_app else 'true' }}, '首页应用')">
+                                    {{ '✓ 首页' if app.is_home_app else '— 普通' }}
+                                </button>
+                            </td>
+                            <td>
+                                <button class="badge {{ 'on' if app.enable_memory else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'enable_memory', {{ 'false' if app.enable_memory else 'true' }}, '习惯功能')">
+                                    {{ '✓ 开启' if app.enable_memory else '— 关闭' }}
+                                </button>
+                            </td>
+                            <td>
+                                <button class="badge {{ 'on' if app.enable_thinking else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'enable_thinking', {{ 'false' if app.enable_thinking else 'true' }}, '思考功能')">
+                                    {{ '✓ 开启' if app.enable_thinking else '— 关闭' }}
+                                </button>
+                            </td>
+                            <td>
+                                {% if global_instant_reply_enabled %}
+                                <button class="badge {{ 'on' if app.enable_instant_reply else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'enable_instant_reply', {{ 'false' if app.enable_instant_reply else 'true' }}, '瞬时回复')">
+                                    {{ '✓ 开启' if app.enable_instant_reply else '— 关闭' }}
+                                </button>
+                                {% else %}
+                                <button class="badge off disabled"
+                                        onclick="showToast('⚠️ 需先在「功能扩展」中开启全局智能瞬时回复开关', 'warn')">
+                                    — 关闭
+                                </button>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="badge {{ 'on' if app.skip_ssl_verify else 'off' }}"
+                                        onclick="toggleField({{ app.id }}, 'skip_ssl_verify', {{ 'false' if app.skip_ssl_verify else 'true' }}, '跳过SSL验证')">
+                                    {{ '✓ 跳过' if app.skip_ssl_verify else '— 验证' }}
+                                </button>
+                            </td>
+                            <td><span class="text-mono">{{ app.api_key[:8] }}...{{ app.api_key[-4:] if app.api_key|length > 12 else '' }}</span></td>
+                            <td><span class="text-truncate">{{ app.base_url or 'http://dify.towh.cn' }}</span></td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="/admin/apps/{{ app.id }}/detail" class="btn-sm-table">详情</a>
+                                    <button class="btn-sm-table" onclick="editApp({{ app.id }}, '{{ app.name }}', '{{ app.api_key }}', '{{ app.base_url or '' }}', '{{ app.welcome_message or '' }}', {{ app.is_active|lower }}, '{{ app.logo_url or '' }}', {{ app.skip_ssl_verify|lower if app.skip_ssl_verify is not none else 'false' }}, {{ app.is_home_app|lower if app.is_home_app is not none else 'false' }}, {{ app.enable_memory|lower if app.enable_memory is not none else 'false' }}, {{ app.enable_thinking|lower if app.enable_thinking is not none else 'false' }}, {{ app.enable_instant_reply|lower if app.enable_instant_reply is not none else 'false' }})">编辑</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9">
+                                <div class="empty-state">暂无应用数据</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Modal -->
+    <div class="modal" id="appModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加应用</h3>
+                <button class="modal-close" onclick="hideModal()">&times;</button>
+            </div>
+            <form id="appForm">
+                <div class="modal-body">
+                    <input type="hidden" id="appId">
+                    <div class="form-group">
+                        <label>应用名称</label>
+                        <input type="text" id="appName" required placeholder="请输入应用名称">
+                    </div>
+                    <div class="form-group">
+                        <label>Dify 服务器地址</label>
+                        <input type="text" id="appBaseUrl" placeholder="https://api.dify.ai/v1">
+                        <p class="form-hint">Dify API 基础地址，如 https://api.dify.ai/v1 或 https://your-dify-server/v1</p>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" id="appApiKey" required placeholder="在 Dify 应用设置 → API 访问中获取">
+                        <p class="form-hint">在 Dify 应用设罦 → API 访问中获取 API Key</p>
+                    </div>
+                    <div class="form-group">
+                        <label>应用介绍</label>
+                        <textarea id="appIntro" rows="3" placeholder="应用描述，仅用于后台管理区分应用"></textarea>
+                        <p class="form-hint">仅在后台管理界面显示，不展示给前端用户</p>
+                    </div>
+                    <div class="form-group">
+                        <label>应用 Logo</label>
+                        <input type="file" id="appLogoFile" accept="image/*">
+                        <p class="form-hint">上传应用图标，支持 PNG、JPG、GIF 格式</p>
+                        <div id="logoPreview" style="margin-top: 12px; display: none;">
+                            <img src="" alt="Logo 预览" style="max-width: 80px; max-height: 80px; border-radius: var(--radius);">
+                        </div>
+                    </div>
+                    <!-- 用户标识字段已统一为 Portal 数字用户 ID，不再提供选项 -->
+                    <div class="form-group" id="sslVerifyGroup" style="display: none;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appSkipSslVerify">
+                            <span>跳过 SSL 证书验证（自签名证书）</span>
+                        </label>
+                        <p class="form-hint">仅对 HTTPS 地址有效，用于自签名证书的服务器</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appHomeApp">
+                            <span>设为首页默认应用</span>
+                        </label>
+                        <p class="form-hint">设为首页后，用户登录将自动进入该应用对话页</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appEnableMemory">
+                            <span>启用习惯功能</span>
+                        </label>
+                        <p class="form-hint">开启后，该应用聊天页面将显示「我的习惯」入口，且 Dify 可调取该用户的习惯数据</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appEnableThinking">
+                            <span>启用思考功能（sikao）</span>
+                        </label>
+                        <p class="form-hint">开启后，该应用聊天页面将显示「快速回复 / 深度思考」切换按钮。<strong>注意：需要同时在 Dify 应用里配置变量名为 <code>sikao</code> 的选择器（选项：快速回复、深度思考），否则切换按钮不会生效。</strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appEnableInstantReply">
+                            <span>启用瞬时回复</span>
+                        </label>
+                        <p class="form-hint">开启后，当 Dify 工作流执行时间较长时，前端会自动显示 AI 正在处理的状态提示，缓解用户等待焦虑。未配置 LLM 时将按固定策略返回状态提示。</p>
+                        {% if not global_instant_reply_enabled %}
+                        <p class="form-hint" style="color: var(--danger);">⚠️ 需先在「功能扩展」中开启全局智能瞬时回复开关，此选项方可生效。</p>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="appActive" checked>
+                            <span>启用应用</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Permission Modal -->
+    <div class="modal permission-modal" id="permissionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>权限管理 - <span id="permissionAppName"></span></h3>
+                <button class="modal-close" onclick="hidePermissionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="permissionAppId">
+                <div class="visibility-options">
+                    <div class="visibility-option" id="visibilityAll" onclick="setVisibility('all')">
+                        <label class="visibility-option-radio">
+                            <input type="radio" name="visibility" value="all" id="radioAll">
+                            <div class="visibility-option-content">
+                                <div class="visibility-option-title">所有人可见</div>
+                                <div class="visibility-option-desc">所有用户都可以访问此应用</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="visibility-option" id="visibilitySpecific" onclick="setVisibility('specific')">
+                        <label class="visibility-option-radio">
+                            <input type="radio" name="visibility" value="specific" id="radioSpecific">
+                            <div class="visibility-option-content">
+                                <div class="visibility-option-title">指定用户可见</div>
+                                <div class="visibility-option-desc">只有被授权的用户可以访问此应用</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="user-permission-section hidden" id="userPermissionSection">
+                    <div class="section-title">点击用户卡片进行授权 / 取消授权</div>
+                    <div class="user-search">
+                        <input type="text" id="userSearchInput" placeholder="搜索用户（姓名、账号）..." oninput="filterUsers(this.value)">
+                    </div>
+                    <div class="user-grid" id="allUsersGrid">
+                        <div style="padding: 20px; text-align: center; color: var(--text-muted);">加载中...</div>
+                    </div>
+                    <div class="selected-count" id="selectedCount">已授权 0 人</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hidePermissionModal()">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="savePermissions()">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div class="modal status-modal" id="statusModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>应用状态 - <span id="statusAppName"></span></h3>
+                <button class="modal-close" onclick="hideStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="statusAppId">
+                <div class="status-info">
+                    <div class="status-row">
+                        <span class="status-label">连接状态</span>
+                        <span class="status-value" id="statusConnection">检测中...</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">最后使用时间</span>
+                        <span class="status-value" id="statusLastUsed">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">响应时间</span>
+                        <span class="status-value" id="statusResponseTime">-</span>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-label">API 版本</span>
+                        <span class="status-value" id="statusApiVersion">-</span>
+                    </div>
+                </div>
+                <div class="section-title">错误日志</div>
+                <div class="error-log" id="errorLog"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideStatusModal()">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="refreshStatus()">刷新</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App Management Functions
+        const modal = document.getElementById('appModal');
+        const form = document.getElementById('appForm');
+        const permissionModal = document.getElementById('permissionModal');
+        const statusModal = document.getElementById('statusModal');
+        let currentVisibility = 'all';
+        let currentPermissions = [];
+        let searchTimeout = null;
+        let pendingChanges = { visibility: null, usersToAdd: [], usersToRemove: [] };
+
+        // User dropdown functions
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userInfo = document.querySelector('.user-info');
+            const dropdown = document.getElementById('userDropdown');
+            if (userInfo && dropdown && !userInfo.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/logout');
+                if (response.ok || response.redirected) {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('退出登录失败:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        function showToast(message, typeOrDuration = 'info', duration = 2000) {
+            // 兼容旧调用：showToast(msg, 2000)
+            let type = 'info';
+            let dur = 2000;
+            if (typeof typeOrDuration === 'number') {
+                dur = typeOrDuration;
+            } else if (typeof typeOrDuration === 'string') {
+                type = typeOrDuration;
+            }
+            if (typeof arguments[2] === 'number') {
+                dur = arguments[2];
+            }
+
+            const colors = {
+                info: 'var(--text-primary)',
+                ok: '#10b981',
+                warn: '#f59e0b',
+                err: '#ef4444'
+            };
+
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 12px 24px;
+                border-radius: var(--radius);
+                z-index: 9999;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: var(--shadow-xl);
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, dur);
+        }
+
+        function showModal() {
+            document.getElementById('modalTitle').textContent = '添加应用';
+            document.getElementById('appId').value = '';
+            form.reset();
+            document.getElementById('sslVerifyGroup').style.display = 'none';
+            // 默认显示得宝 LOGO
+            const preview = document.getElementById('logoPreview');
+            preview.querySelector('img').src = '/static/images/debo-logo.png';
+            preview.style.display = 'block';
+            // 根据全局开关状态设置瞬时回复 checkbox
+            const irCheckbox = document.getElementById('appEnableInstantReply');
+            irCheckbox.disabled = !globalInstantReplyEnabled;
+            modal.classList.add('active');
+        }
+
+        document.getElementById('appBaseUrl').addEventListener('input', function(e) {
+            const url = e.target.value.trim();
+            const sslGroup = document.getElementById('sslVerifyGroup');
+            if (url.startsWith('https://')) {
+                sslGroup.style.display = 'block';
+            } else {
+                sslGroup.style.display = 'none';
+                document.getElementById('appSkipSslVerify').checked = false;
+            }
+        });
+
+        document.getElementById('appLogoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.querySelector('img').src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function hideModal() {
+            modal.classList.remove('active');
+        }
+
+        function hidePermissionModal() {
+            permissionModal.classList.remove('active');
+        }
+
+        function hideStatusModal() {
+            statusModal.classList.remove('active');
+        }
+
+        const globalInstantReplyEnabled = {{ 'true' if global_instant_reply_enabled else 'false' }};
+
+        function editApp(id, name, apiKey, baseUrl, intro, isActive, logoUrl, skipSslVerify = false, isHomeApp = false, enableMemory = false, enableThinking = false, enableInstantReply = false) {
+            document.getElementById('modalTitle').textContent = '编辑应用';
+            document.getElementById('appId').value = id;
+            document.getElementById('appName').value = name;
+            document.getElementById('appApiKey').value = apiKey || '';
+            document.getElementById('appBaseUrl').value = baseUrl || '';
+            document.getElementById('appIntro').value = intro || '';
+            document.getElementById('appActive').checked = isActive;
+            document.getElementById('appSkipSslVerify').checked = skipSslVerify;
+            document.getElementById('appHomeApp').checked = isHomeApp;
+            document.getElementById('appEnableMemory').checked = enableMemory;
+            document.getElementById('appEnableThinking').checked = enableThinking;
+            const irCheckbox = document.getElementById('appEnableInstantReply');
+            irCheckbox.checked = enableInstantReply;
+            irCheckbox.disabled = !globalInstantReplyEnabled;
+
+            const sslGroup = document.getElementById('sslVerifyGroup');
+            if (baseUrl && baseUrl.startsWith('https://')) {
+                sslGroup.style.display = 'block';
+            } else {
+                sslGroup.style.display = 'none';
+            }
+
+            const preview = document.getElementById('logoPreview');
+            const previewImg = preview.querySelector('img');
+            previewImg.src = logoUrl || '/static/images/debo-logo.png';
+            preview.style.display = 'block';
+            modal.classList.add('active');
+            // 打开编辑时滚动到顶部，避免继承上一个应用的滚动位置
+            var modalBody = document.querySelector('#appModal .modal-body');
+            if (modalBody) modalBody.scrollTop = 0;
+        }
+
+        async function deleteApp(id) {
+            if (!confirm('确定要删除此应用吗？此操作不可恢复。')) return;
+            try {
+                const response = await fetch(`/admin/api/apps/${id}/delete`, { method: 'POST' });
+                if (response.ok) {
+                    showToast('✅ 应用已删除', 'ok');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('❌ 删除失败', 'err');
+                }
+            } catch (error) {
+                showToast('❌ 删除失败: ' + error.message, 'err');
+            }
+        }
+
+        async function setHomeApp(id) {
+            try {
+                // 1. 设为首页应用
+                const response = await fetch(`/admin/api/apps/${id}/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'is_home_app=true'
+                });
+                if (!response.ok) {
+                    showToast('❌ 设置失败', 'err');
+                    return;
+                }
+                
+                // 2. 自动设为全员可见
+                await fetch(`/admin/api/apps/${id}/visibility`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visibility_type: 'all' })
+                });
+                
+                showToast('✅ 已设为首页应用（全员可见）', 'ok');
+                setTimeout(() => location.reload(), 500);
+            } catch (error) {
+                showToast('❌ 设置失败: ' + error.message, 'err');
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('appId').value;
+            const formData = new FormData();
+            formData.append('name', document.getElementById('appName').value);
+            formData.append('api_key', document.getElementById('appApiKey').value);
+            formData.append('base_url', document.getElementById('appBaseUrl').value);
+            const introValue = document.getElementById('appIntro').value;
+            formData.append('welcome_message', introValue);
+            formData.append('is_active', document.getElementById('appActive').checked);
+            formData.append('is_home_app', document.getElementById('appHomeApp').checked);
+            formData.append('enable_memory', document.getElementById('appEnableMemory').checked);
+            formData.append('enable_thinking', document.getElementById('appEnableThinking').checked);
+            formData.append('enable_instant_reply', document.getElementById('appEnableInstantReply').checked);
+            formData.append('skip_ssl_verify', document.getElementById('appSkipSslVerify').checked);
+            const logoFile = document.getElementById('appLogoFile').files[0];
+            if (logoFile) formData.append('logo_file', logoFile);
+
+            try {
+                const url = id ? `/admin/api/apps/${id}/update` : '/admin/api/apps';
+                const response = await fetch(url, { method: 'POST', body: formData });
+                if (response.ok) {
+                    showToast(id ? '✅ 应用已更新' : '✅ 应用已创建', 'ok');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    const data = await response.json();
+                    showToast('❌ ' + (data.detail || '保存失败'), 'err');
+                }
+            } catch (error) {
+                showToast('❌ 保存失败: ' + error.message, 'err');
+            }
+        });
+
+        // 点击空白处不关闭弹窗，必须点击关闭/取消/保存按钮
+        // modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+        // permissionModal.addEventListener('click', (e) => { if (e.target === permissionModal) hidePermissionModal(); });
+        // statusModal.addEventListener('click', (e) => { if (e.target === statusModal) hideStatusModal(); });
+
+        // Permission Management
+        let allSystemUsers = [];
+        let filteredUsers = [];
+
+        async function managePermissions(appId, appName) {
+            document.getElementById('permissionAppId').value = appId;
+            document.getElementById('permissionAppName').textContent = appName;
+            pendingChanges = { visibility: null, usersToAdd: [], usersToRemove: [] };
+            allSystemUsers = [];
+            filteredUsers = [];
+            document.getElementById('userSearchInput').value = '';
+            permissionModal.classList.add('active');
+            await Promise.all([loadPermissions(appId), loadAllUsers()]);
+        }
+
+        async function loadPermissions(appId) {
+            try {
+                const response = await fetch(`/admin/api/apps/${appId}/permissions`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        currentVisibility = data.visibility || 'all';
+                        currentPermissions = data.users || [];
+                        updateVisibilityUI();
+                    }
+                }
+            } catch (error) { console.error('加载权限失败:', error); }
+        }
+
+        async function loadAllUsers() {
+            try {
+                const response = await fetch('/admin/api/users/search?keyword=');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.users) {
+                        allSystemUsers = data.users;
+                        filteredUsers = allSystemUsers;
+                        renderUserGrid();
+                    }
+                }
+            } catch (error) { console.error('加载用户列表失败:', error); }
+        }
+
+        function updateVisibilityUI() {
+            document.getElementById('radioAll').checked = currentVisibility === 'all';
+            document.getElementById('radioSpecific').checked = currentVisibility === 'specific';
+            document.getElementById('visibilityAll').classList.toggle('selected', currentVisibility === 'all');
+            document.getElementById('visibilitySpecific').classList.toggle('selected', currentVisibility === 'specific');
+            const userSection = document.getElementById('userPermissionSection');
+            if (currentVisibility === 'all') {
+                userSection.classList.add('hidden');
+            } else {
+                userSection.classList.remove('hidden');
+            }
+        }
+
+        function setVisibility(type) {
+            currentVisibility = type;
+            updateVisibilityUI();
+        }
+
+        function renderUserGrid() {
+            const container = document.getElementById('allUsersGrid');
+            const authorizedIds = new Set(currentPermissions.map(u => u.id));
+            
+            document.getElementById('selectedCount').textContent = `已授权 ${currentPermissions.length} 人`;
+            
+            if (filteredUsers.length === 0) {
+                container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted); grid-column: 1 / -1;">未找到用户</div>';
+                return;
+            }
+            
+            container.innerHTML = filteredUsers.map(user => {
+                const isSelected = authorizedIds.has(user.id);
+                return `
+                    <div class="user-grid-item${isSelected ? ' selected' : ''}" data-user-id="${user.id}" onclick="toggleUserPermission(${user.id})">
+                        <div class="user-grid-avatar">${escapeHtml(user.name.slice(-1))}</div>
+                        <div class="user-grid-name">${escapeHtml(user.name)}</div>
+                        <div class="user-grid-userid">${escapeHtml(user.userid)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleUserPermission(userId) {
+            const user = allSystemUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            const idx = currentPermissions.findIndex(u => u.id === userId);
+            if (idx >= 0) {
+                currentPermissions.splice(idx, 1);
+                if (!pendingChanges.usersToRemove.includes(userId)) {
+                    pendingChanges.usersToRemove.push(userId);
+                }
+                const addIdx = pendingChanges.usersToAdd.indexOf(userId);
+                if (addIdx >= 0) pendingChanges.usersToAdd.splice(addIdx, 1);
+            } else {
+                currentPermissions.push(user);
+                if (!pendingChanges.usersToAdd.includes(userId)) {
+                    pendingChanges.usersToAdd.push(userId);
+                }
+                const removeIdx = pendingChanges.usersToRemove.indexOf(userId);
+                if (removeIdx >= 0) pendingChanges.usersToRemove.splice(removeIdx, 1);
+            }
+            
+            renderUserGrid();
+        }
+
+        function filterUsers(keyword) {
+            const k = keyword.trim().toLowerCase();
+            if (!k) {
+                filteredUsers = allSystemUsers;
+            } else {
+                filteredUsers = allSystemUsers.filter(u => 
+                    (u.name || '').toLowerCase().includes(k) ||
+                    (u.userid || '').toLowerCase().includes(k)
+                );
+            }
+            renderUserGrid();
+        }
+
+        async function savePermissions() {
+            const appId = document.getElementById('permissionAppId').value;
+            try {
+                // 1. Save visibility setting
+                const visibilityResp = await fetch(`/admin/api/apps/${appId}/visibility`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ visibility_type: currentVisibility })
+                });
+                if (!visibilityResp.ok) {
+                    const data = await visibilityResp.json();
+                    showToast('❌ 保存失败: ' + (data.detail || '未知错误'), 'err');
+                    return;
+                }
+
+                // 2. Grant new permissions
+                if (pendingChanges.usersToAdd.length > 0) {
+                    const grantResp = await fetch(`/admin/api/apps/${appId}/permissions/batch-grant`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_ids: pendingChanges.usersToAdd })
+                    });
+                    if (!grantResp.ok) {
+                        const data = await grantResp.json();
+                        showToast('❌ 授权失败: ' + (data.detail || '未知错误'), 'err');
+                        return;
+                    }
+                }
+
+                // 3. Revoke removed permissions
+                if (pendingChanges.usersToRemove.length > 0) {
+                    const revokeResp = await fetch(`/admin/api/apps/${appId}/permissions/batch-revoke`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_ids: pendingChanges.usersToRemove })
+                    });
+                    if (!revokeResp.ok) {
+                        const data = await revokeResp.json();
+                        showToast('❌ 撤销权限失败: ' + (data.detail || '未知错误'), 'err');
+                        return;
+                    }
+                }
+
+                showToast('✅ 权限设置已保存', 'ok');
+                hidePermissionModal();
+                pendingChanges = { visibility: null, usersToAdd: [], usersToRemove: [] };
+            } catch (error) {
+                showToast('❌ 保存失败: ' + error.message);
+            }
+        }
+
+        // Status Modal
+        async function showStatusModal(appId, appName) {
+            document.getElementById('statusAppId').value = appId;
+            document.getElementById('statusAppName').textContent = appName;
+            statusModal.classList.add('active');
+            await refreshStatus();
+        }
+
+        async function refreshStatus() {
+            const appId = document.getElementById('statusAppId').value;
+            const connectionEl = document.getElementById('statusConnection');
+            connectionEl.textContent = '检测中...';
+            connectionEl.style.color = 'var(--text-secondary)';
+            
+            try {
+                const response = await fetch(`/admin/api/apps/${appId}/status`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || '未知错误');
+                }
+                
+                connectionEl.textContent = data.connected ? '在线 🟢' : '离线 🔴';
+                connectionEl.style.color = data.connected ? 'var(--success)' : 'var(--danger)';
+                document.getElementById('statusLastUsed').textContent = data.last_used || '从未使用';
+                document.getElementById('statusResponseTime').textContent = data.response_time ? data.response_time + 'ms' : '-';
+                document.getElementById('statusApiVersion').textContent = data.api_version || '-';
+                const errorLog = document.getElementById('errorLog');
+                if (data.errors && data.errors.length > 0) {
+                    errorLog.innerHTML = data.errors.map(e => `<div style="margin-bottom: 8px; color: var(--danger);">${escapeHtml(e)}</div>`).join('');
+                } else {
+                    errorLog.innerHTML = '<div style="color: var(--text-muted);">暂无错误日志</div>';
+                }
+            } catch (error) {
+                console.error('刷新状态失败:', error);
+                connectionEl.textContent = '检测失败';
+                connectionEl.style.color = 'var(--danger)';
+                document.getElementById('errorLog').innerHTML = `<div style="color: var(--danger);">错误: ${escapeHtml(error.message)}</div>`;
+            }
+        }
+
+        async function testConnection(appId) {
+            const badge = document.getElementById(`connection-${appId}`);
+            if (!badge) return;
+            
+            badge.textContent = '检测中...';
+            badge.className = 'connection-badge';
+            
+            try {
+                const response = await fetch(`/admin/api/apps/${appId}/test`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    badge.className = 'connection-badge connection-online';
+                    badge.textContent = '在线 🟢';
+                } else {
+                    badge.className = 'connection-badge connection-offline';
+                    badge.textContent = '离线 🔴';
+                    console.error('连接测试失败:', data.error);
+                }
+            } catch (error) {
+                badge.className = 'connection-badge connection-offline';
+                badge.textContent = '检测失败';
+                console.error('测试连接失败:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Auto-test all connections on page load (Turbo compatible)
+        function initAppPage() {
+            document.querySelectorAll('[id^="connection-"]').forEach(badge => {
+                const appId = badge.id.replace('connection-', '');
+                testConnection(appId);
+            });
+            // 如果 URL 带 ?view=list 参数，自动切换到列表视图
+            if (window.location.search.includes('view=list')) {
+                switchView('list');
+            }
+        }
+        window.addEventListener('load', initAppPage);
+        document.addEventListener('turbo:load', initAppPage);
+
+        // ==================== 视图切换 ====================
+        function switchView(view) {
+            const cardView = document.getElementById('cardView');
+            const listView = document.getElementById('listView');
+            const btnCard = document.getElementById('btnCardView');
+            const btnList = document.getElementById('btnListView');
+            const pageTitle = document.getElementById('pageTitle');
+            const pageDesc = document.getElementById('pageDesc');
+
+            if (view === 'list') {
+                cardView.style.display = 'none';
+                listView.classList.add('active');
+                btnCard.classList.remove('active');
+                btnList.classList.add('active');
+                pageTitle.textContent = '应用列表';
+                pageDesc.textContent = '总览所有应用的配置状态，点击标签可快速切换开关（需确认）';
+            } else {
+                cardView.style.display = '';
+                listView.classList.remove('active');
+                btnCard.classList.add('active');
+                btnList.classList.remove('active');
+                pageTitle.textContent = '应用管理';
+                pageDesc.textContent = '管理 Dify 应用接入配置';
+            }
+        }
+
+        // ==================== 列表视图快捷操作（必须弹窗确认） ====================
+        function toggleField(appId, field, newValue, fieldName) {
+            const clickedBtn = event.target;
+            const actionText = newValue ? '开启' : '关闭';
+            const confirmMsg = '确认要「' + actionText + '」应用 ID ' + appId + ' 的「' + fieldName + '」吗？';
+            if (!confirm(confirmMsg)) return;
+
+            const formData = new FormData();
+            formData.append(field, newValue);
+
+            fetch('/admin/api/apps/' + appId + '/update', {
+                method: 'POST',
+                body: formData
+            }).then(function(res) {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            }).then(function(data) {
+                if (data.success) {
+                    // 开启绿色，关闭橙色
+                    var toastType = newValue ? 'ok' : 'warn';
+                    showToast('✅ 「' + fieldName + '」已' + actionText, toastType);
+                    // 直接更新当前按钮的 DOM 状态，不刷新页面
+                    var btn = clickedBtn;
+                    if (btn && btn.classList && btn.classList.contains('badge')) {
+                        var labels = {
+                            'is_active': { on: '✓ 已启用', off: '— 已停用' },
+                            'is_home_app': { on: '✓ 首页', off: '— 普通' },
+                            'enable_memory': { on: '✓ 开启', off: '— 关闭' },
+                            'enable_thinking': { on: '✓ 开启', off: '— 关闭' },
+                            'enable_instant_reply': { on: '✓ 开启', off: '— 关闭' },
+                            'skip_ssl_verify': { on: '✓ 跳过', off: '— 验证' }
+                        };
+                        var label = labels[field];
+                        if (label) {
+                            btn.className = 'badge ' + (newValue ? 'on' : 'off');
+                            btn.textContent = newValue ? label.on : label.off;
+                            btn.setAttribute('onclick', "toggleField(" + appId + ", '" + field + "', " + (!newValue) + ", '" + fieldName + "')");
+                        }
+                    }
+                } else {
+                    showToast('⚠️ 更新失败', 'err');
+                }
+            }).catch(function(err) {
+                showToast('⚠️ 请求失败: ' + err.message, 'err');
+            });
+        }
+    </script>
+</body>
+</html>

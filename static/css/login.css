@@ -1,0 +1,263 @@
+/**
+ * Dify Portal - Login Page Styles
+ * 登录页面专用样式
+ */
+
+/* ==================== 登录页基础 ==================== */
+.login-page {
+    background: var(--primary-gradient);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ==================== 登录容器 ==================== */
+.login-container {
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-4xl);
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow-2xl);
+    animation: slideUp var(--transition-normal) ease;
+}
+
+/* ==================== Logo 区域 ==================== */
+.logo {
+    text-align: center;
+    margin-bottom: var(--spacing-3xl);
+}
+
+.logo-icon {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+}
+
+.logo h1 {
+    font-size: 24px;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.logo p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+/* ==================== 登录表单 ==================== */
+.login-form .form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.login-form .form-input {
+    padding: 12px var(--spacing-lg);
+    border-radius: var(--radius-lg);
+}
+
+/* ==================== 登录按钮 ==================== */
+.login-btn {
+    width: 100%;
+    background: var(--primary-gradient);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    margin-top: var(--spacing-sm);
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ==================== 帮助文字 ==================== */
+.help-text {
+    text-align: center;
+    margin-top: var(--spacing-2xl);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.help-text code {
+    background: var(--bg-secondary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+}
+
+/* ==================== 响应式 ==================== */
+@media (max-width: 768px) {
+    .login-page {
+        align-items: flex-start;
+        padding: 0;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .login-container {
+        width: 100%;
+        max-width: 100%;
+        min-height: 100dvh;
+        border-radius: 0;
+        padding: 10vh var(--spacing-lg) var(--spacing-2xl);
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .logo {
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    .logo-icon {
+        font-size: 52px;
+    }
+
+    .logo h1 {
+        font-size: 22px;
+    }
+
+    .logo p {
+        font-size: 14px;
+    }
+
+    .login-form .form-group {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .login-form .form-label {
+        font-size: 15px;
+        margin-bottom: var(--spacing-sm);
+        display: block;
+    }
+
+    .login-form .form-input {
+        padding: 14px var(--spacing-lg);
+        font-size: 16px;  /* 避免 iOS 自动缩放 */
+        min-height: 48px;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .login-btn,
+    .wecom-login-btn {
+        padding: 16px;
+        font-size: 16px;
+        min-height: 52px;
+        border-radius: var(--radius-xl);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .wecom-login-btn {
+        margin-top: var(--spacing-xl);
+    }
+
+    .help-text {
+        margin-top: auto;
+        padding-top: var(--spacing-2xl);
+        font-size: 13px;
+    }
+
+    /* 触摸反馈 */
+    .login-btn:active,
+    .wecom-login-btn:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+}
+
+/* 小屏手机优化（iPhone SE / 小屏安卓） */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 6vh var(--spacing-md) var(--spacing-xl);
+    }
+
+    .logo {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .logo-icon {
+        font-size: 44px;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .logo p {
+        font-size: 13px;
+    }
+
+    .login-form .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .login-form .form-label {
+        font-size: 14px;
+    }
+
+    .login-form .form-input {
+        padding: 12px var(--spacing-md);
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .login-btn,
+    .wecom-login-btn {
+        padding: 14px;
+        min-height: 48px;
+        font-size: 15px;
+    }
+
+    .wecom-login-btn {
+        margin-top: var(--spacing-lg);
+    }
+
+    .help-text {
+        font-size: 12px;
+        padding-top: var(--spacing-xl);
+    }
+}
+
+/* ==================== 企微扫码登录 ==================== */
+.wecom-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    width: 100%;
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    margin-top: var(--spacing-lg);
+}
+
+.wecom-login-btn:hover {
+    background: #3a7dd1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+}
+
+.wecom-icon-emoji {
+    font-size: 18px;
+    line-height: 1;
+    flex-shrink: 0;
+}

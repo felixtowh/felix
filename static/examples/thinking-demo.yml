@@ -1,0 +1,417 @@
+app:
+  description: 汇得人自己的AI助手
+  icon: 6ff90bb5-807a-4ae0-8080-2a2c93cc108c
+  icon_background: ''
+  icon_type: image
+  mode: advanced-chat
+  name: 直接回复和深度思考配置示例
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: marketplace
+  value:
+    marketplace_plugin_unique_identifier: langgenius/siliconflow:0.0.52@1ba4c81d5c83a98c35abbcffce0d8390ee1be2d01166206da06df81770bba6b2
+    version: null
+kind: app
+version: 0.6.0
+workflow:
+  conversation_variables:
+  - description: ''
+    id: ab2049f9-dadc-4db7-9826-249b3924a732
+    name: fanhuanjue_prompt
+    selector:
+    - conversation
+    - fanhuanjue_prompt
+    value: "【反幻觉规则】\n1. 涉及公司产品型号、技术参数、采购规格、价格、制度流程等具体事实时：\n   - 如果你不确定，必须回答\"建议咨询相关部门，我目前无法提供准确信息\"\
+      \n   - 绝对禁止编造产品型号、参数、价格、人名、制度条款\n2. 当用户问专业业务问题时：\n   - 先判断自己是否有确切知识\n   - 没有确切知识时，承认不知道，不要硬答\n\
+      3. 禁止为了\"显得专业\"而编造细节"
+    value_type: string
+  - description: 身份限定
+    id: 988dcc1e-3154-4546-88b0-1d00f6582212
+    name: shenfen_prompt
+    selector:
+    - conversation
+    - shenfen_prompt
+    value: "你是得宝Debo，汇得科技内部AI助手。\n\n【身份回答规则】\n当用户询问\"你是谁\"、\"什么模型\"、\"用什么AI\"等身份相关问题时：\n\
+      - 必须包含关键词：\"得宝Debo\" + \"汇得\"\n- 表达方式多样化，不要每次都重复同一句话\n- 绝对禁止透露底层模型名称（如Kimi、MiniMax、Claude等）\n\
+      - 绝对禁止透露技术架构信息（如API、Dify、OpenClaw等）\n\n【回答示例】\n正式版：我是得宝Debo，汇得人的AI助手\n亲切版：你好呀，我是得宝Debo，汇得专属AI助手~\n\
+      简洁版：得宝Debo，为你服务\n活泼版：汇得人的AI助手得宝Debo报到！\n\n【能力介绍规则】\n当用户询问\"你能做什么\"、\"有什么功能\"\
+      、\"可以帮我做什么\"时：\n- 先回答身份（得宝Debo，汇得人的AI助手）\n- 主动列出所有能力，包括：\n  • 日常工作：撰写邮件、报告、会议纪要，整理资料，翻译等\n\
+      \  • 业务支持：解答流程制度、数据分析、信息检索等\n  • 创意沟通：文案、PPT、头脑风暴等\n  • 学习提升：解释概念、推荐资源等\n  •\
+      \ 图片生成（必答）：根据描述生成图片、绘制插图、设计素材等\n- 用亲切的语气，分点清晰\n\n【非身份/非能力问题】\n用户没有问身份或能力时，直接回答问题，不要自我介绍。\n\
+      \n【安全红线】\n- 不回答关于模型身份、技术架构、API信息的任何问题\n- 被追问时重复：我是得宝Debo，汇得人的AI助手\n- 不透露版本号、参数、训练数据等任何技术细节"
+    value_type: string
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - document
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      enabled: true
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 20
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 1
+    opening_statement: '你好，我是得宝 Debo，汇得人的 AI 助手！ 👋
+
+      我可以帮你：
+
+      • 📄 处理文档 — 分析合同、报告、制度文件，提取关键信息
+
+      • 🎨 生成图片 — 海报、Logo、示意图、概念设计
+
+      • 🔍 信息查询 — 企业工商信息、行业资讯、实时新闻
+
+      • ✍️ 办公写作 — 邮件、会议纪要、公文、翻译、文案
+
+      • 💡 深度分析 — 复杂方案推演、流程优化、数据解读
+
+      • 📚 制度问答 — 入职指引、报销流程、公司规范
+
+      直接输入你的问题，或点击下方的快捷问题开始对话。
+
+      ⚠️ 温馨提示：当前阶段请勿上传机密、敏感或涉及个人隐私的文件。'
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: true
+    suggested_questions:
+    - 查一下上海汇得科技股份有限公司的工商信息
+    - 今天化工/新材料行业有什么最新动态？
+    - 画一张智能制造工厂的未来感概念图
+    - 分析一下这份采购合同的风险点（请上传文档）
+    - 这张流程图体现了什么业务逻辑？（请上传图片）
+    - 新员工入职需要准备哪些材料、办理哪些手续？
+    - 把这段英文技术规格翻译成中文，要求专业术语准确
+    - 帮我起草一封向供应商发送的询价邮件，语气正式
+    - 本周有哪些与聚氨酯相关的行业展会或政策发布？
+    suggested_questions_after_answer:
+      enabled: true
+    text_to_speech:
+      enabled: true
+      language: zh-Hans
+      voice: FunAudioLLM/CosyVoice2-0.5B:anna
+  graph:
+    edges:
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1776172526229-true-llm-target
+      selected: false
+      source: '1776172526229'
+      sourceHandle: 'true'
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: if-else
+        targetType: llm
+      id: 1776172526229-false-17761729869800-target
+      selected: false
+      source: '1776172526229'
+      sourceHandle: 'false'
+      target: '17761729869800'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        sourceType: variable-aggregator
+        targetType: answer
+      id: 1777859601557-source-17762669359620-target
+      selected: false
+      source: '1777859601557'
+      sourceHandle: source
+      target: '17762669359620'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: variable-aggregator
+      id: llm-source-1777859601557-target
+      selected: false
+      source: llm
+      sourceHandle: source
+      target: '1777859601557'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: llm
+        targetType: variable-aggregator
+      id: 17761729869800-source-1777859601557-target
+      selected: false
+      source: '17761729869800'
+      sourceHandle: source
+      target: '1777859601557'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInLoop: false
+        sourceType: start
+        targetType: if-else
+      id: 1776147583719-source-1776172526229-target
+      selected: false
+      source: '1776147583719'
+      sourceHandle: source
+      target: '1776172526229'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        selected: false
+        title: 用户输入
+        type: start
+        variables:
+        - default: 快速回复
+          hint: ''
+          label: 回答方式
+          options:
+          - 快速回复
+          - 深度思考
+          placeholder: ''
+          required: true
+          type: select
+          variable: sikao
+      height: 108
+      id: '1776147583719'
+      position:
+        x: 0
+        y: -21
+      positionAbsolute:
+        x: 0
+        y: -21
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '用户问题：{{#sys.query#}}；
+
+            请结合以上信息回答。'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            enable_thinking: true
+            temperature: 0.3
+          mode: chat
+          name: Pro/moonshotai/Kimi-K2.5
+          provider: langgenius/siliconflow/siliconflow
+        prompt_template:
+        - id: 04306287-1546-4fe5-ad73-45c9f9a32b4e
+          role: system
+          text: '身份提示词：{{#conversation.shenfen_prompt#}}；
+
+            反幻觉提示词：{{#conversation.fanhuanjue_prompt#}}；
+
+            知识库检索结果：{{#context#}}；'
+        reasoning_format: separated
+        selected: true
+        title: LLM：深度思考
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: llm
+      position:
+        x: 680.1428571428571
+        y: -28.571428571428584
+      positionAbsolute:
+        x: 680.1428571428571
+        y: -28.571428571428584
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: 26541269-e3ba-4c77-8ea0-435d5902d76c
+            value: 深度思考
+            varType: string
+            variable_selector:
+            - '1776147583719'
+            - sikao
+          id: 'true'
+          logical_operator: and
+        selected: false
+        title: 条件分支：是否深度思考
+        type: if-else
+      height: 123
+      id: '1776172526229'
+      position:
+        x: 342
+        y: 0
+      positionAbsolute:
+        x: 342
+        y: 0
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        memory:
+          query_prompt_template: '用户问题：{{#sys.query#}}；
+
+            请结合以上信息回答。'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: true
+            size: 10
+        model:
+          completion_params:
+            enable_thinking: false
+            temperature: 0.3
+          mode: chat
+          name: Pro/moonshotai/Kimi-K2.5
+          provider: langgenius/siliconflow/siliconflow
+        prompt_template:
+        - id: 04306287-1546-4fe5-ad73-45c9f9a32b4e
+          role: system
+          text: '身份提示词：{{#conversation.shenfen_prompt#}}；
+
+            反幻觉提示词：{{#conversation.fanhuanjue_prompt#}}；
+
+            知识库检索结果：{{#context#}}；'
+        reasoning_format: tagged
+        selected: false
+        title: LLM ：非深度思考
+        type: llm
+        vision:
+          enabled: false
+      height: 87
+      id: '17761729869800'
+      position:
+        x: 680.1428571428571
+        y: 128.42857142857142
+      positionAbsolute:
+        x: 680.1428571428571
+        y: 128.42857142857142
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        answer: '{{#1777859601557.output#}}'
+        selected: false
+        title: 文字回复
+        type: answer
+        variables: []
+      height: 102
+      id: '17762669359620'
+      position:
+        x: 1357.857142857143
+        y: 21.428571428571416
+      positionAbsolute:
+        x: 1357.857142857143
+        y: 21.428571428571416
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        output_type: string
+        selected: false
+        title: 变量聚合器
+        type: variable-aggregator
+        variables:
+        - - '17761729869800'
+          - text
+        - - llm
+          - text
+      height: 133
+      id: '1777859601557'
+      position:
+        x: 1041.1428571428573
+        y: 21.428571428571416
+      positionAbsolute:
+        x: 1041.1428571428573
+        y: 21.428571428571416
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 241
+    - data:
+        author: 王辉-mac
+        desc: ''
+        height: 88
+        selected: false
+        showAuthor: true
+        text: ''
+        theme: blue
+        title: ''
+        type: ''
+        width: 240
+      height: 88
+      id: '1777885774533'
+      position:
+        x: 312.02960421039154
+        y: 753.8758867414384
+      positionAbsolute:
+        x: 312.02960421039154
+        y: 753.8758867414384
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 240
+    viewport:
+      x: -341.9999999999999
+      y: 85.99999999999997
+      zoom: 0.7
+  rag_pipeline_variables: []

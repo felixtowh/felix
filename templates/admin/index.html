@@ -1,0 +1,345 @@
+{% extends "admin/base.html" %}
+{% set active_nav = 'overview' %}
+{% block title %}概览{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block extra_css %}
+        .welcome-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            color: white;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .welcome-text {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 16px 20px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.blue { background: rgba(99, 102, 241, 0.1); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.1); }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.1); }
+
+        .stat-label {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: var(--text-secondary) !important;
+        }
+
+        .stat-value {
+            font-size: 32px !important;
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+            margin-bottom: 2px;
+            line-height: 1.2;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .action-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow);
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: var(--surface-hover);
+        }
+
+        .action-content { flex: 1; }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .action-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 260px;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-card { padding: 20px; margin-bottom: 16px; }
+            .welcome-title { font-size: 18px; }
+            .welcome-text { font-size: 13px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+            .stat-card { padding: 14px 16px; }
+            .stat-icon { width: 32px; height: 32px; font-size: 16px; }
+            .stat-value { font-size: 22px; }
+            .chart-container { height: 200px; }
+        }
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="welcome-card">
+            <div class="welcome-content">
+                <h2 class="welcome-title">管理员控制台 🚀</h2>
+                <p class="welcome-text">管理 Dify 应用、用户权限和使用统计</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon blue">👥</div>
+                    <div class="stat-label">总用户数</div>
+                </div>
+                <div class="stat-value" id="userCount">-</div>
+                <div class="stat-change">系统注册用户</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon green">🚀</div>
+                    <div class="stat-label">活跃应用</div>
+                </div>
+                <div class="stat-value" id="appCount">-</div>
+                <div class="stat-change">正在运行中</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon orange">💬</div>
+                    <div class="stat-label">总对话数</div>
+                </div>
+                <div class="stat-value" id="messageCount">-</div>
+                <div class="stat-change">累计对话</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon green">🔢</div>
+                    <div class="stat-label">总 token 数</div>
+                </div>
+                <div class="stat-value" id="tokenCount">-</div>
+                <div class="stat-change">累计消耗</div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">📈 近30日平台活跃度</div>
+                    <div class="chart-subtitle">每日活跃用户数 & 对话次数</div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+        function F(n) { if (n >= 1e6) return (n/1e6).toFixed(1)+'M'; if (n >= 1e3) return (n/1e3).toFixed(1)+'K'; return String(n); }
+        async function loadStats() {
+            try {
+                const response = await fetch('/admin/api/stats', { credentials: 'include' });
+                const data = await response.json();
+                document.getElementById('userCount').textContent = F(data.total?.total_users || 0);
+                document.getElementById('appCount').textContent = F(data.total?.active_apps || 0);
+                document.getElementById('messageCount').textContent = F(data.total?.total_conversations || 0);
+                document.getElementById('tokenCount').textContent = F(data.total?.total_tokens || 0);
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+        loadStats();
+
+        async function loadDailyChart() {
+            try {
+                const response = await fetch('/admin/api/stats/daily?days=30', { credentials: 'include' });
+                const data = await response.json();
+                if (!data.success) return;
+
+                const ctx = document.getElementById('activityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.dates,
+                        datasets: [
+                            {
+                                label: '活跃用户数',
+                                data: data.active_users,
+                                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '对话次数',
+                                data: data.message_counts,
+                                type: 'line',
+                                borderColor: 'rgba(245, 158, 11, 1)',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                                tension: 0.3,
+                                fill: true,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                padding: 12,
+                                cornerRadius: 8
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxRotation: 45, minRotation: 45, font: { size: 11 }, maxTicksLimit: window.innerWidth <= 768 ? 6 : 30 }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: '活跃用户数', color: 'rgba(99, 102, 241, 1)' },
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { color: 'rgba(99, 102, 241, 1)' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: '对话次数', color: 'rgba(245, 158, 11, 1)' },
+                                grid: { display: false },
+                                ticks: { color: 'rgba(245, 158, 11, 1)' }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('加载图表失败:', error);
+            }
+        }
+        loadDailyChart();
+{% endblock %}

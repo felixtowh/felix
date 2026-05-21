@@ -1,0 +1,76 @@
+# 敏感配置文件
+.env
+.env.*
+!.env.example
+
+# 数据库和用户数据
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# 用户上传文件
+uploads/
+
+# 日志
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 备份文件
+backup/
+backup-*.tar.gz
+*.tar.gz
+
+# SSL 证书和密钥
+certs/
+*.key
+*.crt
+*.pem
+
+# 其他敏感文件
+cookies.txt
+security-check.sh
+setup-https*.sh
+
+# 快照和恢复脚本
+体验前快照-snapshot.sh
+恢复脚本-restore.sh

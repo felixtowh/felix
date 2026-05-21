@@ -1,0 +1,424 @@
+{% extends "admin/base.html" %}
+{% set active_nav = 'stats' %}
+{% block title %}使用统计{% endblock %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block extra_css %}
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-icon.blue { background: rgba(99, 102, 241, 0.1); }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.1); }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.1); }
+
+        .stat-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .stat-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: var(--text-secondary) !important;
+        }
+
+        .stat-value {
+            font-size: 32px !important;
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+            margin-bottom: 4px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            margin-bottom: 32px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-overview { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-section { padding: 14px; margin-bottom: 16px; }
+            .stat-card { padding: 14px 12px; }
+            .stat-icon { width: 36px; height: 36px; font-size: 18px; }
+            .stat-header { gap: 8px; margin-bottom: 8px; }
+            .stat-label { font-size: 14px !important; }
+            .stat-value { font-size: 24px !important; }
+            .stat-change { font-size: 11px; }
+            .chart-container { height: 220px; }
+            .chart-card { margin-bottom: 16px; padding: 16px; }
+        }
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="page-header" style="margin-bottom: 32px;">
+            <div class="page-title-group">
+                <h2 >使用统计</h2>
+                <p style="font-size: 14px; color: var(--text-secondary);">查看系统使用情况和用户活跃度</p>
+            </div>
+        </div>
+
+        <!-- 总数据 -->
+        <div class="stat-section">
+            <div class="stat-section-title">📊 总数据</div>
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">👥</div>
+                        <div class="stat-label">总用户数</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.total_users or 0 }}</div>
+                    <div class="stat-change">系统注册用户</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">🚀</div>
+                        <div class="stat-label">活跃应用</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.active_apps or 0 }}</div>
+                    <div class="stat-change">正在运行中</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">💬</div>
+                        <div class="stat-label">总对话数</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.total_conversations or 0 }}</div>
+                    <div class="stat-change">累计对话</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">🔢</div>
+                        <div class="stat-label">总 token 数</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.total_tokens or 0 }}</div>
+                    <div class="stat-change">累计消耗</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日数据 -->
+        <div class="stat-section">
+            <div class="stat-section-title">📅 今日数据</div>
+            <div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon blue">⚡</div>
+                        <div class="stat-label">今日活跃用户</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.today_active_users or 0 }}</div>
+                    <div class="stat-change">有对话的用户</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon green">🚀</div>
+                        <div class="stat-label">今日活跃应用</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.today_active_apps or 0 }}</div>
+                    <div class="stat-change">有对话的应用</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">📅</div>
+                        <div class="stat-label">今日新增对话</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.today_conversations or 0 }}</div>
+                    <div class="stat-change">今日创建的对话</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon orange">🔥</div>
+                        <div class="stat-label">今日 token 消耗</div>
+                    </div>
+                    <div class="stat-value">{{ stats.total.today_tokens or 0 }}</div>
+                    <div class="stat-change">今日累计消耗</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-title">📈 近30日平台活跃度</div>
+            <div class="chart-subtitle">每日活跃用户数 & 对话次数</div>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-title">🥧 各应用使用占比</div>
+            <div class="chart-subtitle">按对话数统计</div>
+            <div class="chart-container">
+                <canvas id="appPieChart"></canvas>
+            </div>
+        </div>
+
+        <!-- App Usage -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">📊 应用使用情况</h3>
+            </div>
+            {% if stats.app_stats %}
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th>应用名称</th><th>使用用户数</th><th>总对话数</th><th>最后使用</th></tr>
+                </thead>
+                <tbody>
+                    {% for app in stats.app_stats %}
+                    <tr>
+                        <td><strong>{{ app.app_name }}</strong></td>
+                        <td>{{ app.user_count or 0 }}</td>
+                        <td>{{ app.total_conversations or 0 }}</td>
+                        <td>{{ app.last_used or '从未使用' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <div class="empty-title">暂无数据</div>
+                <p>应用使用数据将在用户开始对话后显示</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- User Activity -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">👤 用户活跃度</h3>
+            </div>
+            {% if stats.user_stats %}
+            <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th>用户</th><th>使用应用数</th><th>总对话数</th><th>最后活跃</th></tr>
+                </thead>
+                <tbody>
+                    {% for user in stats.user_stats %}
+                    <tr>
+                        <td>
+                            <strong>{{ user.user_name }}</strong>
+                            <span style="color: var(--text-muted); margin-left: 8px;">({{ user.userid }})</span>
+                        </td>
+                        <td>{{ user.app_count or 0 }}</td>
+                        <td>{{ user.total_conversations or 0 }}</td>
+                        <td>{{ user.last_used or '从未使用' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👤</div>
+                <div class="empty-title">暂无数据</div>
+                <p>用户活跃数据将在用户开始对话后显示</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+        function F(n) { if (n >= 1e6) return (n/1e6).toFixed(1)+'M'; if (n >= 1e3) return (n/1e3).toFixed(1)+'K'; return String(n); }
+        document.querySelectorAll('.stat-value').forEach(function(el) { var v = parseInt(el.textContent); if (!isNaN(v)) el.textContent = F(v); });
+        async function loadDailyChart() {
+            try {
+                const response = await fetch('/admin/api/stats/daily?days=30', { credentials: 'include' });
+                const data = await response.json();
+                if (!data.success) return;
+
+                const ctx = document.getElementById('activityChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.dates,
+                        datasets: [
+                            {
+                                label: '活跃用户数',
+                                data: data.active_users,
+                                backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                                borderColor: 'rgba(99, 102, 241, 1)',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '对话次数',
+                                data: data.message_counts,
+                                type: 'line',
+                                borderColor: 'rgba(245, 158, 11, 1)',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                                tension: 0.3,
+                                fill: true,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                                padding: 12,
+                                cornerRadius: 8
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxRotation: 45, minRotation: 45, font: { size: 11 }, maxTicksLimit: window.innerWidth <= 768 ? 6 : 30 }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: '活跃用户数', color: 'rgba(99, 102, 241, 1)' },
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { color: 'rgba(99, 102, 241, 1)' }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: '对话次数', color: 'rgba(245, 158, 11, 1)' },
+                                grid: { display: false },
+                                ticks: { color: 'rgba(245, 158, 11, 1)' }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('加载图表失败:', error);
+            }
+        }
+        loadDailyChart();
+
+        // 应用占比饼图
+        (function loadAppPieChart() {
+            const appData = {{ stats.app_stats | tojson }};
+            if (!appData || appData.length === 0) return;
+            const labels = appData.map(a => a.app_name);
+            const values = appData.map(a => a.total_conversations || 0);
+            const colors = [
+                'rgba(99, 102, 241, 0.7)',
+                'rgba(16, 185, 129, 0.7)',
+                'rgba(245, 158, 11, 0.7)',
+                'rgba(239, 68, 68, 0.7)',
+                'rgba(6, 182, 212, 0.7)',
+                'rgba(139, 92, 246, 0.7)',
+                'rgba(236, 72, 153, 0.7)',
+                'rgba(59, 130, 246, 0.7)'
+            ];
+            const borderColors = colors.map(c => c.replace('0.7', '1'));
+
+            const ctx = document.getElementById('appPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: borderColors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { padding: 16, font: { size: 13 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const pct = total ? ((context.raw / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${context.raw} 条 (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        })();
+{% endblock %}

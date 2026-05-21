@@ -1,0 +1,1095 @@
+{% extends "admin/base.html" %}
+{% set active_nav = 'memory_config' %}
+{% block title %}功能扩展{% endblock %}
+{% block extra_css %}
+        .settings-layout {
+            display: flex;
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+        .settings-sidebar {
+            width: 180px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 24px;
+            align-self: flex-start;
+        }
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .sidebar-link {
+            display: block;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-bottom: 4px;
+            transition: all 0.15s;
+        }
+        .sidebar-link:hover {
+            background: #f3f4f6;
+            color: var(--text-primary);
+        }
+        .settings-main {
+            flex: 1;
+            min-width: 0;
+        }
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .page-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        .section-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        .section-card.habit { background: #fff; }
+        .section-card.thinking { background: #fff; }
+        .section-divider {
+            margin: 40px 0;
+            border-top: 2px solid #e5e7eb;
+        }
+        .section-card:last-child { margin-bottom: 0; }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .section-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        .cicon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .c-g { background: #d1fae5; }
+        .c-b { background: #dbeafe; }
+        .c-a { background: #fef3c7; }
+        .c-r { background: #fee2e2; }
+
+        /* 锚点滚动补偿（sticky header 高度约 64px + 间距） */
+        section[id], .sub-card[id], .guide-block[id], .example[id], .prompt[id] {
+            scroll-margin-top: 80px;
+        }
+
+        /* 点击导航后的高亮提示 */
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        .highlight-target {
+            animation: highlightPulse 2s ease-out;
+            border-color: var(--primary) !important;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .sidebar-toggle { display: none; background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-size: 13px; cursor: pointer; width: 100%; text-align: left; margin-bottom: 8px; }
+        .sidebar-toggle::after { content: ' ▾'; float: right; }
+        .sidebar-toggle.open::after { content: ' ▴'; }
+
+        .sidebar-pulltab { display: none; position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 98; width: 28px; height: 60px; background: var(--primary); color: #fff; border: none; border-radius: 0 8px 8px 0; cursor: pointer; font-size: 16px; writing-mode: vertical-lr; padding: 8px 4px; box-shadow: 2px 0 8px rgba(0,0,0,.1); }
+
+        @media (max-width: 900px) {
+            .settings-layout { flex-direction: column; }
+            .sidebar-pulltab { display: flex; align-items: center; justify-content: center; }
+            .sidebar-toggle { display: none; }
+            .settings-sidebar {
+                position: fixed; top: 0; left: 0; z-index: 100;
+                background: var(--surface); height: 100vh; overflow-y: auto;
+                box-shadow: 4px 0 20px rgba(0,0,0,.15);
+                transform: translateX(-100%); transition: transform 0.3s;
+                padding: 24px 20px; max-width: 300px; width: 85vw;
+            }
+            .settings-sidebar.open { transform: translateX(0); }
+            .settings-sidebar .sidebar-link {
+                display: block; padding: 12px 10px; font-size: 15px;
+                border-radius: 8px; margin-bottom: 4px; color: var(--text-primary);
+            }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 99; }
+            .sidebar-overlay.show { display: block; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .settings-main { padding: 0 4px; }
+        }
+
+        .switch-row {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+        }
+        .switch-t { flex: 1; }
+        .switch-t .t { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+        .switch-t .d { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+        .toggle {
+            position: relative; width: 52px; height: 28px;
+            flex-shrink: 0; cursor: pointer;
+        }
+        .toggle input {
+            position: absolute; opacity: 0; width: 0; height: 0;
+        }
+        .toggle .track {
+            position: absolute; inset: 0;
+            background: #d1d5db; border-radius: 28px;
+            transition: background 0.25s;
+        }
+        .toggle .track::after {
+            content: ''; position: absolute;
+            width: 22px; height: 22px;
+            background: white; border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.25s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .toggle input:checked + .track { background: #22c55e; }
+        .toggle input:checked + .track::after { transform: translateX(24px); }
+
+        .status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 100px;
+            font-size: 12px; font-weight: 600;
+            margin-left: auto;
+            transition: all 0.25s;
+        }
+        .status.on { background: #d1fae5; color: #065f46; }
+        .status.off { background: #f3f4f6; color: #6b7280; }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .status.on .status-dot { background: #10b981; }
+        .status.off .status-dot { background: #9ca3af; }
+
+        .key-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .key-wrap .btn { white-space: nowrap; flex-shrink: 0; }
+        .key-in {
+            flex: 1; padding: 10px 14px;
+            border: 1px solid #e5e7eb; border-radius: 10px;
+            font-size: 14px; background: #f9fafb; color: #374151;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+        .key-in:focus { outline: none; border-color: var(--primary); background: #fff; }
+        .btn {
+            padding: 10px 16px; border: 1px solid #e5e7eb; border-radius: 10px;
+            background: #fff; color: var(--text-secondary); font-size: 13px;
+            cursor: pointer; transition: all 0.15s; white-space: nowrap;
+        }
+        .btn:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-p {
+            background: var(--primary); color: white; border-color: var(--primary);
+        }
+        .btn-p:hover { opacity: 0.9; }
+        .btn-p:disabled { opacity: 0.5; cursor: not-allowed; }
+        .hint { font-size: 13px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+        .save-w { margin-top: 20px; }
+
+        .sub-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .sub-card-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px;
+        }
+        .sub-card-header h3 {
+            font-size: 15px; font-weight: 600; color: var(--text-primary); margin: 0;
+        }
+
+        .guide-block {
+            margin-top: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .guide-title {
+            padding: 12px 16px;
+            background: #f9fafb;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .guide-body {
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #374151;
+        }
+        .guide-body ul {
+            margin: 8px 0 0 0;
+            padding-left: 18px;
+        }
+        .guide-body li {
+            margin-bottom: 4px;
+        }
+        .guide-body p {
+            margin: 0 0 8px 0;
+        }
+        .guide-body p:last-child {
+            margin-bottom: 0;
+        }
+        .guide-body strong {
+            color: #111827;
+        }
+
+        .code-block {
+            background: #0f172a; color: #e2e8f0;
+            padding: 16px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 13px; line-height: 1.7;
+            overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+        }
+        .code-block .c { color: #64748b; }
+        .code-block .s { color: #a3e635; }
+        .code-block .k { color: #c084fc; }
+        .code-block .v { color: #fcd34d; }
+        .code-block .t { color: #60a5fa; }
+        .code-header {
+            display: flex; align-items: center; gap: 6px;
+            padding: 10px 14px; background: #1e293b;
+            border-bottom: 1px solid #334155;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot.r { background: #ef4444; }
+        .dot.y { background: #eab308; }
+        .dot.g { background: #22c55e; }
+
+        .prompt {
+            background: #f0fdf4; border-left: 3px solid #22c55e;
+            border-radius: 0 10px 10px 0;
+            padding: 14px 16px; margin-top: 12px;
+        }
+        .prompt .l { font-size: 11px; font-weight: 700; color: #15803d; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .prompt .x { font-size: 13px; color: #166534; line-height: 1.6; }
+        .prompt-blue {
+            background: #eff6ff; border-left-color: #3b82f6;
+        }
+        .prompt-blue .l { color: #1d4ed8; }
+        .prompt-blue .x { color: #1e3a8a; }
+
+        .dimmed { opacity: 0.4; pointer-events: none; filter: grayscale(0.5); transition: opacity 0.3s; }
+
+        .toast {
+            position: fixed; top: 20px; right: 20px;
+            padding: 14px 24px; border-radius: 10px;
+            font-size: 14px; color: white;
+            display: none; z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .toast.ok { background: #10b981; }
+        .toast.warn { background: #f59e0b; }
+        .toast.err { background: #ef4444; }
+        .toast.show { display: block; }
+
+        .side-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+        .side-tag.portal { background: #dbeafe; color: #1e40af; }
+        .side-tag.dify { background: #fce7f3; color: #9d174d; }
+
+        @media (prefers-color-scheme: dark) {
+            .section-card { background: var(--surface) !important; border-color: var(--border) !important; }
+            .section-header { border-color: var(--border) !important; }
+            .sidebar-title { border-color: var(--border) !important; }
+            .sidebar-link:hover { background: var(--surface-hover) !important; }
+            .sub-card { background: var(--surface) !important; border-color: var(--border) !important; }
+            .guide-block { border-color: var(--border) !important; }
+            .guide-title { background: var(--surface-hover) !important; border-color: var(--border) !important; }
+            .guide-body { color: var(--text-secondary) !important; }
+            .guide-body strong { color: var(--text-primary) !important; }
+            .key-in { background: var(--surface-hover) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+            .key-in:focus { background: var(--surface) !important; }
+            .btn { background: var(--surface) !important; border-color: var(--border) !important; }
+            .prompt { background: rgba(34,197,94,0.1) !important; }
+            .prompt-blue { background: rgba(59,130,246,0.1) !important; }
+            .status.off { background: var(--surface-hover) !important; color: var(--text-muted) !important; }
+            .code-block { background: #0f172a !important; }
+            .code-header { background: #1e293b !important; }
+        }
+{% endblock %}
+{% block content %}
+<div class="settings-layout">
+    <!-- 移动端：左侧拉环 + 遮罩 -->
+    <button class="sidebar-pulltab" onclick="toggleSidebar()">目 录</button>
+    <div class="sidebar-overlay" id="sb-overlay" onclick="toggleSidebar()"></div>
+    <!-- 左侧目录 -->
+    <aside class="settings-sidebar">
+        <div class="sidebar-title">目录导航</div>
+        <a href="#habit-config" class="sidebar-link">📖 习惯功能配置</a>
+        <a href="#habit-switch" class="sidebar-link" style="padding-left:24px; font-size:13px;">(a) 接口开关</a>
+        <a href="#habit-key" class="sidebar-link" style="padding-left:24px; font-size:13px;">(b) 调用密钥</a>
+        <a href="#habit-portal" class="sidebar-link" style="padding-left:24px; font-size:13px;">(c) Portal 端操作</a>
+        <a href="#habit-dify" class="sidebar-link" style="padding-left:24px; font-size:13px;">(d) Dify 端操作</a>
+        <a href="#thinking-config" class="sidebar-link">🧠 思考功能配置</a>
+        <a href="#thinking-portal" class="sidebar-link" style="padding-left:24px; font-size:13px;">(a) Portal 端操作</a>
+        <a href="#thinking-dify" class="sidebar-link" style="padding-left:24px; font-size:13px;">(b) Dify 端操作</a>
+        <a href="#thinking-demo" class="sidebar-link" style="padding-left:24px; font-size:13px;">(c) 示例应用下载</a>
+        <a href="#thinking-tips" class="sidebar-link" style="padding-left:24px; font-size:13px;">(d) 常见误区</a>
+        <a href="#instant-reply-config" class="sidebar-link">⚡ 智能瞬时回复</a>
+        <a href="#instant-reply-switch" class="sidebar-link" style="padding-left:24px; font-size:13px;">(a) 功能开关</a>
+        <a href="#instant-reply-llm" class="sidebar-link" style="padding-left:24px; font-size:13px;">(b) LLM 配置</a>
+    </aside>
+
+    <!-- 右侧内容 -->
+    <div class="settings-main">
+        <div class="page-title">功能扩展</div>
+        <div class="page-desc">管理 Portal 端的扩展功能策略，包括习惯功能、思考功能、智能瞬时回复等配置</div>
+
+        <!-- ========== 习惯功能配置 ========== -->
+        <section id="habit-config" class="section-card habit">
+            <div class="section-header">
+                <div class="cicon c-a">📖</div>
+                <h2>习惯功能配置</h2>
+            </div>
+
+            <div class="grid-2">
+                <!-- 接口开关 -->
+                <div class="sub-card" id="habit-switch">
+                    <div class="sub-card-header">
+                        <div class="cicon c-g">🔌</div>
+                        <h3>接口开关</h3>
+                        <span class="status off" id="stag">
+                            <span class="status-dot"></span>
+                            <span id="slab">已关闭</span>
+                        </span>
+                    </div>
+                    <div class="switch-row">
+                        <div class="switch-t">
+                            <div class="t">开启习惯接口</div>
+                            <div class="d">关闭后，前端聊天页面将隐藏「我的习惯」入口，Dify 应用也无法调用习惯接口。</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="sw" onchange="onSwChange()">
+                            <span class="track"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 调用密钥 -->
+                <div class="sub-card" id="habit-key">
+                    <div class="sub-card-header">
+                        <div class="cicon c-b">🔐</div>
+                        <h3>调用密钥</h3>
+                    </div>
+                    <div class="key-wrap">
+                        <input type="text" class="key-in" id="kin" placeholder="点击右侧按钮生成密钥">
+                        <button class="btn" onclick="genKey()">🎲 生成</button>
+                        <button class="btn" onclick="cpyKey()">📋 复制</button>
+                    </div>
+                    <div class="hint">Dify Workflow 中的 HTTP 请求节点调用 Portal 习惯接口时，需要在 Header 中携带此 Key。</div>
+                    <div class="save-w">
+                        <button class="btn btn-p" id="sbtn" onclick="doSave()">保存密钥</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 习惯配置内容区（开关关闭后整体变灰） -->
+            <div id="habit-body">
+            <!-- Portal 端操作 -->
+            <div class="guide-block" id="habit-portal" style="margin-top: 20px;">
+                <div class="guide-title"><span class="side-tag portal">Portal 端</span>需要完成的操作</div>
+                <div class="guide-body">
+                    <p><strong>步骤 1：</strong>打开上方「接口开关」，并确保「调用密钥」已填写。开关状态改变后会自动保存。</p>
+                    <p><strong>步骤 2：</strong>进入「应用管理 → 编辑应用」，勾选「启用习惯功能」。只有勾选的应用，其聊天页面才会显示「📝 我的习惯」入口。</p>
+                </div>
+            </div>
+
+            <!-- Dify 端操作 -->
+            <div class="guide-block" id="habit-dify">
+                <div class="guide-title"><span class="side-tag dify">Dify 端</span>需要完成的操作</div>
+                <div class="guide-body">
+                    <p>在 Dify Workflow 中配置 HTTP 请求节点，调用 Portal 的习惯接口：</p>
+                </div>
+                <div class="code-header"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
+                <div class="code-block" id="ex1">{% raw %}<span class="c">// ========== 推荐：直接获取习惯纯文本（GET）==========</span>
+<span class="c">// Dify 的 HTTP 请求节点输出的 body 是字符串，
+// 加 ?format=text 可直接拿到纯文本，无需写代码转换器</span>
+<span class="k">方法</span>: GET
+<span class="k">URL</span>: <span id="ex-url" class="v">{{#portal_base_url#}}</span>/api/external/memories?format=text
+<span class="k">Headers</span>:
+  X-Portal-Key: <span class="v">{{#portal_key#}}</span>
+  X-Portal-User-Id: <span class="v">{{#portal_user_id#}}</span>
+
+<span class="c">// 下游节点（如 LLM）直接引用习惯内容：</span>
+用户的个人习惯：{{#http_node.body#}}
+
+<span class="c">// ========== 高级：获取 JSON 格式（需要代码转换器）==========</span>
+<span class="k">方法</span>: GET
+<span class="k">URL</span>: <span id="ex-url3" class="v">{{#portal_base_url#}}</span>/api/external/memories
+<span class="k">Headers</span>:
+  X-Portal-Key: <span class="v">{{#portal_key#}}</span>
+  X-Portal-User-Id: <span class="v">{{#portal_user_id#}}</span>
+
+<span class="c">// 写入用户习惯（POST）</span>
+<span class="k">方法</span>: POST
+<span class="k">URL</span>: <span id="ex-url2" class="v">{{#portal_base_url#}}</span>/api/external/memory
+<span class="k">Headers</span>:
+  Content-Type: application/json
+  X-Portal-Key: <span class="v">{{#portal_key#}}</span>
+  X-Portal-User-Id: <span class="v">{{#portal_user_id#}}</span>
+
+<span class="k">Body</span> (JSON):
+{
+  <span class="s">"action"</span>: <span class="s">"add"</span>,
+  <span class="s">"content"</span>: <span class="s">"用户新习惯内容"</span>
+}
+<span class="c">// action 可选值: add / update / delete</span>{% endraw %}</div>
+                <div class="prompt" style="margin: 0; border-radius: 0;">
+                    <div class="l">💡 配置提示</div>
+                    <div class="x">
+                        <strong>推荐用法：</strong>URL 后面加上 <code>?format=text</code>，Dify 的 HTTP 请求节点返回的 <code>body</code> 就是习惯纯文本（如 <code>"爱吃萝卜;爱吃清淡"</code>），在下游 LLM 节点中直接引用 <code>{% raw %}{{#http_node.body#}}{% endraw %}</code> 即可，<strong>不需要写代码转换器</strong>。<br><br>
+                        <strong>空习惯处理：</strong>如果用户没有任何习惯记录，返回的是空字符串 <code>""</code>，Dify 不会报错，Prompt 中该位置自然为空，无需额外判断。<br><br>
+                        <strong>变量说明：</strong><br>
+                        • <code>{% raw %}{{#portal_user_id#}}{% endraw %}</code> = Portal 用户账号（userid，唯一标识，用于 API 调用）<br>
+                        • <code>{% raw %}{{#portal_key#}}{% endraw %}</code> = 调用密钥<br>
+                        • <code>{% raw %}{{#portal_base_url#}}{% endraw %}</code> = Portal 服务器地址
+                    </div>
+                </div>
+            </div>
+
+            <!-- 示例应用下载 -->
+            <div class="guide-block">
+                <div class="guide-title">📥 习惯功能示例应用下载</div>
+                <div class="guide-body">
+                    <p>如果你不熟悉 Dify 中 HTTP 请求节点的配置方式，可以下载下方示例应用，导入 Dify 后查看具体的 Workflow 编排：</p>
+                    <p style="margin-top: 10px;">
+                        <a href="/static/examples/memory-demo.yml" download class="btn" style="display:inline-flex; text-decoration:none;">⬇️ 下载习惯功能示例应用</a>
+                        <span style="color:#9ca3af; margin-left:8px;">（下载后进入 Dify → 创建应用 → 导入 DSL）</span>
+                    </p>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ========== 思考功能配置 ========== -->
+        <section id="thinking-config" class="section-card thinking">
+            <div class="section-header">
+                <div class="cicon c-a">🧠</div>
+                <h2>思考功能配置</h2>
+            </div>
+
+            <!-- Portal 端操作 -->
+            <div class="guide-block" id="thinking-portal">
+                <div class="guide-title"><span class="side-tag portal">Portal 端</span>需要完成的操作</div>
+                <div class="guide-body">
+                    <p>进入「应用管理 → 编辑应用」，勾选「启用思考功能（sikao）」。只有勾选的应用，其聊天页面才会显示下拉切换按钮。</p>
+                </div>
+            </div>
+
+            <!-- Dify 端操作 -->
+            <div class="guide-block" id="thinking-dify">
+                <div class="guide-title"><span class="side-tag dify">Dify 端</span>需要完成的操作</div>
+                <div class="guide-body">
+                    <p>在 Dify 应用的「编排 → 对话开场白 → 变量」中添加一个<strong>选择器（select / 下拉选项）</strong>类型的变量：</p>
+                    <ul>
+                        <li><strong>变量名</strong>：<code>sikao</code></li>
+                        <li><strong>标签</strong>：回答方式（或包含「方式」二字）</li>
+                        <li><strong>选项 1</strong>：快速回复 —— 对应<strong>不思考</strong>模式（默认轻量回复）</li>
+                        <li><strong>选项 2</strong>：深度思考 —— 对应<strong>思考</strong>模式（启用推理增强）</li>
+                        <li><strong>默认值</strong>：快速回复</li>
+                    </ul>
+                    <p>配置完成后，Portal 会在聊天页面顶部渲染一个下拉选择器。用户选择「深度思考」时，Dify 会收到 <code>sikao=深度思考</code>，你可以在 Workflow 的<strong>条件分支节点</strong>中根据该值走不同的模型分支。</p>
+                </div>
+            </div>
+
+            <!-- 示例下载 -->
+            <div class="guide-block" id="thinking-demo">
+                <div class="guide-title">📥 示例应用下载</div>
+                <div class="guide-body">
+                    <p>如果你不熟悉 Dify 中条件分支的配置方式，可以下载下方示例应用，导入 Dify 后查看具体的 Workflow 编排：</p>
+                    <p style="margin-top: 10px;">
+                        <a href="/static/examples/thinking-demo.yml" download class="btn" style="display:inline-flex; text-decoration:none;">⬇️ 下载思考功能示例应用</a>
+                        <span style="color:#9ca3af; margin-left:8px;">（下载后进入 Dify → 创建应用 → 导入 DSL）</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="prompt" id="thinking-tips" style="margin-top: 16px;">
+                <div class="l">💡 常见误区</div>
+                <div class="x">只勾选 Portal 里的开关，但 Dify 里没有配置 <code>sikao</code> 变量 → 下拉按钮不会显示。<br>只在 Dify 里配置了变量，但 Portal 里没有开启开关 → 下拉按钮也不会显示。<strong>两个条件必须同时满足。</strong></div>
+            </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- ========== 智能瞬时回复配置 ========== -->
+        <section id="instant-reply-config" class="section-card">
+            <div class="section-header">
+                <div class="cicon c-a">⚡</div>
+                <h2>智能瞬时回复</h2>
+            </div>
+
+            <div class="guide-block" id="instant-reply-switch">
+                <div class="guide-title"><span class="side-tag portal">Portal 端</span>功能开关</div>
+                <div class="guide-body">
+                    <p>当 Dify 工作流执行时间较长时（如含外部 API 调用、知识检索、复杂计算），前端会自动显示 AI 正在处理的状态提示，缓解用户等待焦虑。</p>
+                    <div style="margin-top:10px;padding:10px 14px;background:var(--surface-hover);border-radius:8px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        <strong>无 LLM 回复策略：</strong>即使不配 LLM 参数，功能也会生效。未配置 LLM 时，系统按以下固定策略自动返回状态提示：
+                        <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px;">
+                            <thead><tr style="background:rgba(0,0,0,0.04);"><th style="padding:5px 8px;text-align:left;border:1px solid #d1d5db;font-weight:600;color:var(--text-primary);">触发时间</th><th style="padding:5px 8px;text-align:left;border:1px solid #d1d5db;font-weight:600;color:var(--text-primary);">回复内容</th></tr></thead>
+                            <tbody>
+                                <tr><td style="padding:5px 8px;border:1px solid #d1d5db;">第 1 次轮询（5秒）</td><td style="padding:5px 8px;border:1px solid #d1d5db;">正在为您处理中，请稍候...</td></tr>
+                                <tr style="background:rgba(0,0,0,0.02);"><td style="padding:5px 8px;border:1px solid #d1d5db;">第 2 次轮询（10秒）</td><td style="padding:5px 8px;border:1px solid #d1d5db;">还在努力处理中，请耐心等待...</td></tr>
+                                <tr><td style="padding:5px 8px;border:1px solid #d1d5db;">第 3 次轮询（15秒）</td><td style="padding:5px 8px;border:1px solid #d1d5db;">处理时间较长，感谢您的耐心等候...</td></tr>
+                                <tr style="background:rgba(0,0,0,0.02);"><td style="padding:5px 8px;border:1px solid #d1d5db;">第 4 次轮询（20秒+）</td><td style="padding:5px 8px;border:1px solid #d1d5db;">仍在处理中，马上就好...</td></tr>
+                                <tr><td style="padding:5px 8px;border:1px solid #d1d5db;">第 6 次轮询（30秒+）</td><td style="padding:5px 8px;border:1px solid #d1d5db;">非常抱歉让您久等了，仍在处理中...</td></tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top:8px;margin-bottom:0;">配置 LLM 后，将使用 AI 动态生成状态提示，效果更自然。</p>
+                    </div>
+                    <div class="switch-row" style="margin-top:12px;">
+                        <div class="switch-t">
+                            <div class="t">开启智能瞬时回复</div>
+                            <div class="d">关闭后，前端聊天页面不会显示 AI 处理状态提示。</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="ir-sw" onchange="onInstantReplySwitchChange('ir-sw')">
+                            <span class="track"></span>
+                        </label>
+                    </div>
+                    <div class="switch-row" style="margin-top:12px;">
+                        <div class="switch-t">
+                            <div class="t">使用 LLM 生成自然回复</div>
+                            <div class="d">开启后，使用下方配置的 LLM 动态生成状态提示；关闭则使用固定模板回复。</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="ir-llm-sw" onchange="onInstantReplySwitchChange('ir-llm-sw')">
+                            <span class="track"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="guide-block" id="instant-reply-llm">
+                <div class="guide-title"><span class="side-tag portal">Portal 端</span>LLM 配置（进阶）</div>
+                <div class="guide-body" id="ir-body">
+                    <p>瞬时回复追求<strong>极速响应</strong>（1-3 秒），请选用轻量快速模型，不要使用推理/思考类模型（如 deepseek-reasoner、o1）。</p>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">响应模式</label>
+                        <select id="ir-mode" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;">
+                            <option value="poll">持续轮询 — 每隔 N 秒持续更新状态</option>
+                            <option value="single">单次响应 — 只回复一次处理确认</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">轮询间隔（秒）</label>
+                        <input type="number" id="ir-interval" min="3" max="10" value="5" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Max Tokens（越小响应越快、越省钱）</label>
+                        <input type="number" id="ir-max-tokens" min="20" max="100" value="40" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">快捷预设</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <button type="button" class="btn btn-sm" onclick="setPreset('deepseek')">DeepSeek</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('kimi')">Kimi</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('siliconflow')">硅基流动</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('aliyun')">阿里云百炼</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('zhipu')">智谱 GLM</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('minimax')">Minimax</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('openai')">OpenAI</button>
+                            <button type="button" class="btn btn-sm" onclick="setPreset('custom')">自定义</button>
+                        </div>
+                        <div id="ir-preset-help" style="margin-top:8px;font-size:12px;color:var(--text-secondary);display:none;"></div>
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">Base URL</label>
+                        <input type="text" id="ir-base-url" placeholder="https://api.openai.com/v1" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">API Key</label>
+                        <div style="position:relative;">
+                            <input type="password" id="ir-api-key" placeholder="sk-..." style="width:100%;padding:8px 36px 8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                            <button type="button" id="ir-api-key-eye" onclick="toggleApiKeyVisibility()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-muted);" title="显示/隐藏">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">模型名称</label>
+                        <input type="text" id="ir-model" placeholder="留空将根据 Base URL 自动匹配默认模型" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                    </div>
+
+                    <div style="margin-top:12px;">
+                        <label style="display:block;font-size:13px;color:var(--text-muted);margin-bottom:4px;">系统提示词</label>
+                        <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;background:var(--surface-hover);padding:6px 10px;border-radius:6px;">
+                            可用变量：<code>{query}</code>（用户消息）<code>{elapsed}</code>（已等待秒数）<code>{last_reply}</code>（上一次播报内容）
+                        </div>
+                        <textarea id="ir-prompt" rows="6" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;resize:vertical;"></textarea>
+                        <div style="margin-top:6px;display:flex;gap:8px;">
+                            <button type="button" class="btn btn-sm" onclick="restoreDefaultPrompt()">恢复默认提示词</button>
+                            <button type="button" class="btn btn-sm" onclick="clearPrompt()">一键清空</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:16px;">
+                        <button type="button" class="btn btn-primary" id="ir-save-btn" onclick="saveInstantReply()">保存配置</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="toast" id="tbox"></div>
+{% endblock %}
+{% block extra_js %}
+function toggleSidebar() { var s = document.querySelector('.settings-sidebar'); var o = document.getElementById('sb-overlay'); var t = document.querySelector('.sidebar-pulltab'); var open = s.classList.toggle('open'); if (o) o.classList.toggle('show', open); if (t) t.style.display = open ? 'none' : 'flex'; }
+
+// === 全局变量 ===
+var sw = document.getElementById('sw');
+var kin = document.getElementById('kin');
+var habitKeyEl = document.getElementById('habit-key');
+var stag = document.getElementById('stag');
+var slab = document.getElementById('slab');
+var tbox = document.getElementById('tbox');
+
+// === Toast ===
+function toast(text, type) {
+    // type: 'ok' | 'warn' | 'err'，默认 'ok'
+    tbox.textContent = text;
+    tbox.className = 'toast ' + (type || 'ok') + ' show';
+    setTimeout(function() { tbox.classList.remove('show'); }, 3000);
+}
+
+// === 状态同步 ===
+function syncUI() {
+    var on = sw.checked;
+    var habitBody = document.getElementById('habit-body');
+    var habitKey = document.getElementById('habit-key');
+    if (on) {
+        if (habitKey) habitKey.classList.remove('dimmed');
+        if (habitBody) habitBody.classList.remove('dimmed');
+        stag.className = 'status on';
+        slab.textContent = '已开启';
+    } else {
+        if (habitKey) habitKey.classList.add('dimmed');
+        if (habitBody) habitBody.classList.add('dimmed');
+        stag.className = 'status off';
+        slab.textContent = '已关闭';
+    }
+}
+
+function onSwChange() {
+    syncUI();
+    autoSaveSwitch();
+}
+
+// === 开关自动保存（使用 fetch） ===
+var autoSaveTimer = null;
+function autoSaveSwitch() {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(function() {
+        var enabled = sw.checked;
+        var payload = JSON.stringify({ key: 'memory_api_enabled', value: enabled });
+        console.log('[autoSaveSwitch] sending:', payload);
+        fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+        }).then(function(res) {
+            console.log('[autoSaveSwitch] response status:', res.status);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        }).then(function(data) {
+            console.log('[autoSaveSwitch] response data:', data);
+            if (data.success) {
+                toast('✅ 习惯接口已' + (enabled ? '开启' : '关闭'), enabled ? 'ok' : 'warn');
+            } else {
+                toast('⚠️ ' + (data.message || '保存失败'), 'err');
+                sw.checked = !enabled;
+                syncUI();
+            }
+        }).catch(function(err) {
+            console.error('[autoSaveSwitch] error:', err);
+            toast('⚠️ 保存失败: ' + err.message, 'err');
+            sw.checked = !enabled;
+            syncUI();
+        });
+    }, 300);
+}
+
+// === 加载配置 ===
+function loadSettings() {
+    console.log('[loadSettings] fetching...');
+    fetch('/api/admin/settings', {
+        headers: { 'Accept': 'application/json' }
+    }).then(function(res) {
+        console.log('[loadSettings] status:', res.status);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    }).then(function(data) {
+        console.log('[loadSettings] data:', JSON.stringify(data));
+        sw.checked = data.memory_api_enabled ? true : false;
+        kin.value = data.external_api_key || '';
+        var baseUrl = (data.portal_url || window.location.origin).replace(/\/$/, '');
+        var exUrl = document.getElementById('ex-url');
+        var exUrl2 = document.getElementById('ex-url2');
+        if (exUrl) exUrl.textContent = baseUrl;
+        if (exUrl2) exUrl2.textContent = baseUrl;
+        syncUI();
+        
+        // 加载瞬时回复配置
+        var irSw = document.getElementById('ir-sw');
+        var irLlmSw = document.getElementById('ir-llm-sw');
+        var irMode = document.getElementById('ir-mode');
+        var irInterval = document.getElementById('ir-interval');
+        var irMaxTokens = document.getElementById('ir-max-tokens');
+        var irBaseUrl = document.getElementById('ir-base-url');
+        var irApiKey = document.getElementById('ir-api-key');
+        var irModel = document.getElementById('ir-model');
+        var irPrompt = document.getElementById('ir-prompt');
+        if (irSw) irSw.checked = data.instant_reply_enabled ? true : false;
+        if (irLlmSw) irLlmSw.checked = data.instant_reply_llm_enabled ? true : false;
+        if (irMode) irMode.value = data.instant_reply_mode || 'single';
+        if (irInterval) irInterval.value = data.instant_reply_interval || '5';
+        if (irMaxTokens) irMaxTokens.value = data.instant_reply_max_tokens || '40';
+        if (irBaseUrl) irBaseUrl.value = data.instant_reply_base_url || '';
+        if (irApiKey) irApiKey.value = data.instant_reply_api_key || '';
+        if (irModel) irModel.value = data.instant_reply_model || '';
+        // 提示词：未自定义时填充默认提示词
+        if (irPrompt) irPrompt.value = data.instant_reply_prompt || DEFAULT_INSTANT_PROMPT;
+        // 响应模式与轮询间隔联动：单次响应时禁用轮询间隔
+        function updateIrIntervalState() {
+            if (irMode && irInterval) {
+                var isSingle = irMode.value === 'single';
+                irInterval.disabled = isSingle;
+                irInterval.parentElement.style.opacity = isSingle ? '0.5' : '1';
+            }
+        }
+        if (irMode) irMode.addEventListener('change', updateIrIntervalState);
+        updateIrIntervalState();
+        // LLM 配置区域仅在 LLM 增强开关开启时才可编辑
+        var irBody = document.getElementById('ir-body');
+        if (irBody) {
+            if (data.instant_reply_enabled && data.instant_reply_llm_enabled) {
+                irBody.classList.remove('dimmed');
+                irBody.querySelectorAll('input, select, textarea, button').forEach(function(el) { el.disabled = false; });
+            } else {
+                irBody.classList.add('dimmed');
+                irBody.querySelectorAll('input, select, textarea, button').forEach(function(el) { el.disabled = true; });
+            }
+            // 重新应用轮询间隔联动状态，避免被上面的循环覆盖
+            updateIrIntervalState();
+        }
+        // LLM 增强开关仅在基础开关开启时可操作
+        if (irLlmSw) irLlmSw.disabled = !data.instant_reply_enabled;
+    }).catch(function(err) {
+        console.error('[loadSettings] error:', err);
+    });
+}
+
+// === 生成密钥（16位混合大小写）===
+function genKey() {
+    try {
+        var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var arr = new Uint8Array(16);
+        if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+            crypto.getRandomValues(arr);
+        } else {
+            for (var i = 0; i < 16; i++) {
+                arr[i] = Math.floor(Math.random() * 256);
+            }
+        }
+        var out = '';
+        for (var j = 0; j < 16; j++) {
+            out += chars[arr[j] % chars.length];
+        }
+        kin.value = out;
+        kin.focus();
+        kin.select();
+        toast('密钥已生成');
+    } catch (e) {
+        toast('生成失败: ' + (e.message || '未知错误'), 'err');
+    }
+}
+
+// === 复制密钥 ===
+function cpyKey() {
+    var val = kin.value;
+    if (!val) { toast('暂无密钥可复制', 'warn'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(val).then(
+            function() { toast('✅ 已复制到剪贴板'); },
+            function() { fallbackCopy(val); }
+        );
+    } else {
+        fallbackCopy(val);
+    }
+}
+
+function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        toast('✅ 已复制到剪贴板');
+    } catch (e) {
+        toast('复制失败', 'err');
+    }
+    document.body.removeChild(ta);
+}
+
+// === 保存密钥 ===
+function doSave() {
+    var keyValue = kin.value.trim();
+    var sbtn = document.getElementById('sbtn');
+    sbtn.disabled = true;
+    var oldText = sbtn.textContent;
+    sbtn.textContent = '保存中...';
+
+    fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'external_api_key', value: keyValue })
+    }).then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+    }).then(function(data) {
+        if (data.success) {
+            toast('✅ 密钥已保存');
+        } else {
+            toast('⚠️ ' + (data.message || '保存失败'), 'err');
+        }
+    }).catch(function(err) {
+        toast('⚠️ 保存失败: ' + err.message, 'err');
+    }).finally(function() {
+        sbtn.disabled = false;
+        sbtn.textContent = oldText;
+    });
+}
+
+// === 导航链接点击：平滑滚动 + 高亮提示 ===
+function initNavLinks() {
+    document.querySelectorAll('.sidebar-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            var href = link.getAttribute('href');
+            if (!href || href.charAt(0) !== '#') return;
+            e.preventDefault();
+            var target = document.querySelector(href);
+            if (!target) return;
+
+            // 平滑滚动
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // 移除旧的高亮
+            document.querySelectorAll('.highlight-target').forEach(function(el) {
+                el.classList.remove('highlight-target');
+            });
+
+            // 添加高亮（2秒后移除）
+            target.classList.add('highlight-target');
+            setTimeout(function() {
+                target.classList.remove('highlight-target');
+            }, 2000);
+        });
+    });
+}
+
+// === 智能瞬时回复 ===
+var DEFAULT_INSTANT_PROMPT = "你是一个 AI 助手的状态播报员。用户正在等待一个复杂工作流的执行结果。\n\n当前信息：\n- 用户原始请求：{query}\n- 已经等待了：{elapsed} 秒\n- 你上一次播报的内容：{last_reply}\n\n要求：\n- 生成一句新的状态提示，让用户知道系统仍在积极处理中\n- 必须结合上一次的播报内容递进，不要重复之前说过的话\n- 语气亲切自然，15-25 字\n- 如果等待时间很长（>30秒），适当表达歉意\n- 聚焦在'处理进度'上，不要重复用户的问题\n\n只输出纯文本，不要任何前缀、JSON 格式、编号。";
+
+function onInstantReplySwitchChange(sourceId) {
+    var irSw = document.getElementById('ir-sw');
+    var irLlmSw = document.getElementById('ir-llm-sw');
+    var irBody = document.getElementById('ir-body');
+    // LLM 配置区域仅在 LLM 增强开关开启时才可编辑
+    if (irBody) {
+        if (irSw.checked && irLlmSw && irLlmSw.checked) {
+            irBody.classList.remove('dimmed');
+            irBody.querySelectorAll('input, select, textarea, button').forEach(function(el) { el.disabled = false; });
+        } else {
+            irBody.classList.add('dimmed');
+            irBody.querySelectorAll('input, select, textarea, button').forEach(function(el) { el.disabled = true; });
+        }
+    }
+    // LLM 增强开关仅在基础开关开启时可操作
+    if (irLlmSw) irLlmSw.disabled = !irSw.checked;
+    // 保存基础开关
+    var promises = [
+        fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: 'instant_reply_enabled', value: irSw.checked ? '1' : '' })
+        })
+    ];
+    // 保存 LLM 增强开关
+    if (irLlmSw) {
+        promises.push(fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: 'instant_reply_llm_enabled', value: irLlmSw.checked ? '1' : '' })
+        }));
+    }
+    Promise.all(promises).then(function() {
+        if (sourceId === 'ir-sw') {
+            toast('✅ 智能瞬时回复已' + (irSw.checked ? '开启' : '关闭'), irSw.checked ? 'ok' : 'warn');
+        } else if (sourceId === 'ir-llm-sw') {
+            toast('✅ LLM 自然回复已' + (irLlmSw.checked ? '开启' : '关闭'), irLlmSw.checked ? 'ok' : 'warn');
+        } else {
+            toast('✅ 设置已保存');
+        }
+    }).catch(function(e) { toast('⚠️ 保存失败', 'err'); });
+}
+
+function saveInstantReply() {
+    var sbtn = document.getElementById('ir-save-btn');
+    var oldText = sbtn.textContent;
+    sbtn.disabled = true;
+    sbtn.textContent = '保存中...';
+    
+    var fields = [
+        {key: 'instant_reply_llm_enabled', el: 'ir-llm-sw', type: 'checkbox'},
+        {key: 'instant_reply_mode', el: 'ir-mode'},
+        {key: 'instant_reply_interval', el: 'ir-interval'},
+        {key: 'instant_reply_max_tokens', el: 'ir-max-tokens'},
+        {key: 'instant_reply_base_url', el: 'ir-base-url'},
+        {key: 'instant_reply_api_key', el: 'ir-api-key'},
+        {key: 'instant_reply_model', el: 'ir-model'},
+        {key: 'instant_reply_prompt', el: 'ir-prompt'}
+    ];
+    
+    var promises = fields.map(function(f) {
+        var el = document.getElementById(f.el);
+        if (el) {
+            var val;
+            if (f.type === 'checkbox') {
+                val = el.checked ? '1' : '';
+            } else {
+                val = el.value;
+            }
+            return fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: f.key, value: val })
+            });
+        }
+        return Promise.resolve();
+    });
+    
+    Promise.all(promises).then(function() {
+        toast('✅ 瞬时回复配置已保存');
+    }).catch(function(e) {
+        toast('⚠️ 保存失败', 'err');
+    }).finally(function() {
+        sbtn.disabled = false;
+        sbtn.textContent = oldText;
+    });
+}
+
+function toggleApiKeyVisibility() {
+    var input = document.getElementById('ir-api-key');
+    var btn = document.getElementById('ir-api-key-eye');
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+        btn.title = '隐藏';
+    } else {
+        input.type = 'password';
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+        btn.title = '显示';
+    }
+}
+
+function setPreset(name) {
+    var presets = {
+        deepseek: { base: 'https://api.deepseek.com/v1', model: 'deepseek-v4-flash', helpUrl: 'https://platform.deepseek.com/api_keys', helpText: 'DeepSeek 开放平台' },
+        kimi: { base: 'https://api.moonshot.cn/v1', model: 'kimi-latest', helpUrl: 'https://platform.moonshot.cn/console/api-keys', helpText: 'Kimi 开放平台' },
+        siliconflow: { base: 'https://api.siliconflow.cn/v1', model: 'deepseek-ai/DeepSeek-V3', helpUrl: 'https://cloud.siliconflow.cn/account/ak', helpText: '硅基流动' },
+        aliyun: { base: 'https://dashscope.aliyuncs.com/compatible-mode/v1', model: 'qwen-turbo', helpUrl: 'https://bailian.console.aliyun.com/#/api-key', helpText: '阿里云百炼' },
+        zhipu: { base: 'https://open.bigmodel.cn/api/paas/v4', model: 'glm-4.7-flashx', helpUrl: 'https://open.bigmodel.cn/usercenter/apikeys', helpText: '智谱 AI 开放平台' },
+        minimax: { base: 'https://api.minimax.chat/v1', model: 'abab6.5s-chat', helpUrl: 'https://platform.minimaxi.com/user-center/basic-interface', helpText: 'Minimax 开放平台' },
+        openai: { base: 'https://api.openai.com/v1', model: 'gpt-4o-mini', helpUrl: 'https://platform.openai.com/api-keys', helpText: 'OpenAI' },
+        custom: { base: '', model: '', helpUrl: '', helpText: '' }
+    };
+    var p = presets[name];
+    if (!p) return;
+    document.getElementById('ir-base-url').value = p.base;
+    document.getElementById('ir-model').value = p.model;
+    // 显示/隐藏对应平台的文档链接
+    var helpDiv = document.getElementById('ir-preset-help');
+    if (helpDiv) {
+        if (p.helpUrl) {
+            helpDiv.innerHTML = '💡 前往 <a href="' + p.helpUrl + '" target="_blank" style="color:var(--primary);text-decoration:underline;">' + p.helpText + '</a> 获取 API Key →';
+            helpDiv.style.display = 'block';
+        } else {
+            helpDiv.style.display = 'none';
+        }
+    }
+}
+
+function restoreDefaultPrompt() {
+    var el = document.getElementById('ir-prompt');
+    if (el) {
+        el.value = DEFAULT_INSTANT_PROMPT;
+        toast('✅ 已恢复默认提示词');
+    }
+}
+
+function clearPrompt() {
+    var el = document.getElementById('ir-prompt');
+    if (el) {
+        el.value = '';
+        toast('✅ 已清空提示词');
+    }
+}
+
+// === 初始化 ===
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        loadSettings();
+        initNavLinks();
+    });
+} else {
+    loadSettings();
+    initNavLinks();
+}
+{% endblock %}

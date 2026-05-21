@@ -1,0 +1,39 @@
+services:
+  portal:
+    build: .
+    container_name: dify-portal
+    ports:
+      - "0.0.0.0:8088:8088"  # Dify Portal 使用 8088 端口
+    # 数据持久化到宿主机
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./app:/app/app  # Python 代码热更新
+      - ./templates:/app/templates
+      - ./static:/app/static
+    environment:
+      - TZ=Asia/Shanghai
+      - DATABASE_URL=sqlite:///app/data/portal.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - DIFY_API_TIMEOUT=60
+      - PORTAL_URL=${PORTAL_URL:-}
+      - WECHAT_CORP_ID=${WECHAT_CORP_ID:-}
+      - WECHAT_AGENT_ID=${WECHAT_AGENT_ID:-}
+      - WECHAT_SECRET=${WECHAT_SECRET:-}
+    restart: unless-stopped
+    # 安全加固
+    security_opt:
+      - no-new-privileges:true  # 禁止提升权限
+    cap_drop:
+      - ALL  # 丢弃所有能力
+    cap_add:
+      - NET_BIND_SERVICE  # 仅保留绑定端口能力
+    networks:
+      - portal-network
+
+
+networks:
+  portal-network:
+    driver: bridge
+    internal: false

@@ -74,3 +74,7 @@ setup-https*.sh
 # 快照和恢复脚本
 体验前快照-snapshot.sh
 恢复脚本-restore.sh
+
+# 品牌相关
+static/images/debo-logo.png
+static/WW_verify_*.txt
